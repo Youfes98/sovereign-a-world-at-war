@@ -22,7 +22,7 @@ Shader "WarStrategy/MapShader"
 
         _CountryColorStr ("Country Color Strength", Range(0,1)) = 0.65
         _TerrainDesat ("Terrain Desat", Range(0,1)) = 0.10
-        _ElevationStrength ("Elevation Relief", Float) = 10.0
+        _ElevationStrength ("Elevation Relief", Float) = 12.0
         _NoiseStr ("Noise Strength", Float) = 0.012
         _DetailStrength ("Detail Strength", Float) = 0.02
         _BiomeDetailStrength ("Biome Detail", Float) = 0.15
@@ -34,7 +34,7 @@ Shader "WarStrategy/MapShader"
         _PaperTint ("Paper Tint", Color) = (1.0, 0.96, 0.88, 1)
         _PaperStrength ("Paper Strength", Float) = 0.18
 
-        _CloudStr ("Cloud Strength", Range(0,1)) = 0.22
+        _CloudStr ("Cloud Strength", Range(0,1)) = 0.30
         _CloudScale ("Cloud Scale", Float) = 1.5
         _CloudSpeed ("Cloud Speed", Float) = 0.02
         _FogStr ("Fog Strength", Range(0,1)) = 0.06
@@ -372,7 +372,7 @@ Shader "WarStrategy/MapShader"
                         float3 biomeCol = BiomeColor(tt, height, uv);
                         // Boost terrain saturation before blending
                         float tLum = Lum(terrain);
-                        float3 terrSat = lerp(float3(tLum,tLum,tLum), terrain, 1.4); // +40% saturation
+                        float3 terrSat = lerp(float3(tLum,tLum,tLum), terrain, 1.8); // +80% saturation for rich warm tones
                         biomeBase = terrSat * 0.6 + biomeCol * 0.4;
                     }
                     else if (_HasTerrainTypes > 0.5)
@@ -419,14 +419,14 @@ Shader "WarStrategy/MapShader"
                     {
                         // Reconstruct normal from heightmap gradient (dx/dy computed earlier)
                         float3 normal = normalize(float3(-dx * _ElevationStrength, -dy * _ElevationStrength, 1.0));
-                        float3 sunDir = normalize(float3(-0.45, 0.3, 0.75)); // NW sun
+                        float3 sunDir = normalize(float3(-0.5, 0.3, 0.7)); // NW sun, dramatic angle
                         float diffuse = max(dot(normal, sunDir), 0.0);
-                        float lighting = 0.65 + 0.35 * diffuse;
+                        float lighting = 0.55 + 0.45 * diffuse; // deeper shadows, brighter peaks
                         // Valley AO
                         float grad = sqrt(dx*dx + dy*dy);
                         float ao = saturate(1.0 - grad * _ElevationStrength * 0.8);
-                        lighting *= lerp(0.88, 1.0, ao);
-                        col *= clamp(lighting, 0.65, 1.25);
+                        lighting *= lerp(0.85, 1.0, ao);
+                        col *= clamp(lighting, 0.50, 1.40); // dramatic range for 3D depth
                         // Elevation color shift: warm lowlands, slightly cool highlands
                         float3 lowTint  = float3(1.02, 0.98, 0.92); // warm boost
                         float3 highTint = float3(0.92, 0.92, 0.94); // barely cool
@@ -621,16 +621,16 @@ Shader "WarStrategy/MapShader"
                         {
                             if (ownerC == selectedOwnerId)
                             {
-                                // Selected country: brighten and saturate — make it pop
-                                col = col * (1.0 + 0.25 * _SelectionDarken);
-                                col = lerp(col, col * float3(1.08, 1.04, 0.92), 0.4 * _SelectionDarken);
+                                // Selected country: DRAMATICALLY brighter with golden warmth
+                                col = col * (1.0 + 0.45 * _SelectionDarken);
+                                col = lerp(col, col * float3(1.20, 1.10, 0.85), 0.6 * _SelectionDarken);
                             }
                             else
                             {
-                                // Other countries: darken significantly + desaturate
-                                col *= lerp(1.0, 0.35, _SelectionDarken);
+                                // Other countries: heavily darkened + desaturated
+                                col *= lerp(1.0, 0.25, _SelectionDarken);
                                 float lum = dot(col, float3(0.299, 0.587, 0.114));
-                                col = lerp(col, float3(lum, lum, lum), 0.4 * _SelectionDarken);
+                                col = lerp(col, float3(lum, lum, lum), 0.5 * _SelectionDarken);
                             }
                         }
                     }
@@ -666,10 +666,12 @@ Shader "WarStrategy/MapShader"
                 {
                     float cloud1 = smoothNoise(uv * _CloudScale + _Time.y * float2(_CloudSpeed, _CloudSpeed * 0.7));
                     float cloud2 = smoothNoise(uv * _CloudScale * 2.3 + _Time.y * float2(-_CloudSpeed * 0.6, _CloudSpeed * 0.4) + float2(7,13));
-                    float clouds = smoothstep(0.35, 0.65, cloud1 * 0.6 + cloud2 * 0.4);
-                    float cloudMask = (idx > 0) ? 1.0 : 0.6; // stronger on land
-                    float3 cloudCol = Desat(col * 0.88 + float3(0.04, 0.04, 0.05), 0.15);
-                    col = lerp(col, cloudCol, clouds * _CloudStr * cloudFade * cloudMask);
+                    float clouds = smoothstep(0.28, 0.58, cloud1 * 0.6 + cloud2 * 0.4);
+                    float cloudMask = (idx > 0) ? 1.0 : 0.7;
+                    // Dramatic clouds: whiter, more visible (like actual cloud banks)
+                    float3 cloudCol = col * 0.70 + float3(0.18, 0.18, 0.20);
+                    cloudCol = Desat(cloudCol, 0.08);
+                    col = lerp(col, cloudCol, clouds * _CloudStr * cloudFade * cloudMask * 1.5);
                 }
 
                 // Distance fog (atmospheric haze at viewport edges)
