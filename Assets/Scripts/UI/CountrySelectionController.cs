@@ -105,12 +105,15 @@ namespace WarStrategy.UI
 
         private void OnCountrySelected(string iso)
         {
+            // Skip zoom if same country already selected (user is clicking provinces within it)
+            bool sameCountry = iso == _selectedIso;
             _selectedIso = iso;
 
             if (Services.GameState == null) return;
             if (!Services.GameState.Countries.TryGetValue(iso, out var country)) return;
 
-            ShowCountryCard(country);
+            if (!sameCountry)
+                ShowCountryCard(country);
 
             // Highlight the selected country on the map
             if (_mapRenderer != null && _borderRenderer != null)
@@ -119,8 +122,8 @@ namespace WarStrategy.UI
                 _mapRenderer.SetCountryHighlight(ownerId / 255f, 0.85f);
             }
 
-            // Smart zoom: calculate bounds and fit country in viewport
-            if (_mapCamera != null && Services.ProvinceDB != null)
+            // Smart zoom: only when selecting a NEW country
+            if (!sameCountry && _mapCamera != null && Services.ProvinceDB != null)
             {
                 var (center, size) = Services.ProvinceDB.GetCountryBounds(iso);
 

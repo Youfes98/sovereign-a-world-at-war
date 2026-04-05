@@ -92,7 +92,7 @@ namespace WarStrategy.Core
 
             // Camera clear color = ocean blue
             cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = new Color(0.06f, 0.12f, 0.22f, 1f);
+            cam.backgroundColor = new Color(0.08f, 0.16f, 0.28f, 1f);
         }
 
         void SetupMap()
@@ -230,8 +230,22 @@ namespace WarStrategy.Core
                 }
 
                 labelRenderer.SetCountryData(labelData);
+
+                // Feed city/capital label data
+                labelRenderer.ClearCityData();
+                int cityCount = 0;
+                foreach (var kvp in gameState.Countries)
+                {
+                    var c = kvp.Value;
+                    if (!string.IsNullOrEmpty(c.Capital) && c.CapitalCentroid != Vector2.zero)
+                    {
+                        labelRenderer.SetCityData(c.Iso, c.Capital, c.CapitalCentroid, c.Population);
+                        cityCount++;
+                    }
+                }
+
 #if UNITY_EDITOR
-                Debug.Log($"[SceneSetup] Fed {labelData.Count} country labels.");
+                Debug.Log($"[SceneSetup] Fed {labelData.Count} country labels, {cityCount} city labels.");
 #endif
             }
 

@@ -20,19 +20,28 @@ Shader "WarStrategy/MapShader"
         [Toggle] _HasDetail ("Has Detail", Float) = 0
         [Toggle] _HasTerrainTypes ("Has Terrain Types", Float) = 0
 
-        _CountryColorStr ("Country Color Strength", Range(0,1)) = 0.52
-        _TerrainDesat ("Terrain Desat", Range(0,1)) = 0.35
-        _ElevationStrength ("Elevation Relief", Float) = 12.0
-        _NoiseStr ("Noise Strength", Float) = 0.025
-        _DetailStrength ("Detail Strength", Float) = 0.08
-        _BiomeDetailStrength ("Biome Detail", Float) = 0.3
-        _CoastGlowStr ("Coast Glow", Float) = 0.18
+        _CountryColorStr ("Country Color Strength", Range(0,1)) = 0.65
+        _TerrainDesat ("Terrain Desat", Range(0,1)) = 0.10
+        _ElevationStrength ("Elevation Relief", Float) = 10.0
+        _NoiseStr ("Noise Strength", Float) = 0.012
+        _DetailStrength ("Detail Strength", Float) = 0.02
+        _BiomeDetailStrength ("Biome Detail", Float) = 0.15
+        _CoastGlowStr ("Coast Glow", Float) = 0.35
 
-        _OceanDeep ("Ocean Deep", Color) = (0.04, 0.08, 0.18, 1)
-        _OceanMid ("Ocean Mid", Color) = (0.08, 0.16, 0.30, 1)
-        _OceanShallow ("Ocean Shallow", Color) = (0.12, 0.24, 0.40, 1)
-        _PaperTint ("Paper Tint", Color) = (0.97, 0.94, 0.88, 1)
-        _PaperStrength ("Paper Strength", Float) = 0.12
+        _OceanDeep ("Ocean Deep", Color) = (0.08, 0.16, 0.28, 1)
+        _OceanMid ("Ocean Mid", Color) = (0.14, 0.28, 0.40, 1)
+        _OceanShallow ("Ocean Shallow", Color) = (0.22, 0.42, 0.50, 1)
+        _PaperTint ("Paper Tint", Color) = (1.0, 0.96, 0.88, 1)
+        _PaperStrength ("Paper Strength", Float) = 0.18
+
+        _CloudStr ("Cloud Strength", Range(0,1)) = 0.22
+        _CloudScale ("Cloud Scale", Float) = 1.5
+        _CloudSpeed ("Cloud Speed", Float) = 0.02
+        _FogStr ("Fog Strength", Range(0,1)) = 0.06
+        _FogColor ("Fog Color", Color) = (0.82, 0.85, 0.88, 1)
+
+        _SnowHeight ("Snow Height Threshold", Range(0,1)) = 0.92
+        _SnowStr ("Snow Strength", Range(0,1)) = 0.6
 
         _ZoomLevel ("Zoom Level", Float) = 1.0
         _ZoomTerrainStart ("Terrain Fade Start", Float) = 2.5
@@ -115,6 +124,11 @@ Shader "WarStrategy/MapShader"
                 float _PlayerOwnerValue;
                 float _SelectedOwnerValue;
                 float _SelectionDarken;
+
+                float _CloudStr, _CloudScale, _CloudSpeed;
+                float _FogStr;
+                float4 _FogColor;
+                float _SnowHeight, _SnowStr;
             CBUFFER_END
 
             // ── Helpers ──
@@ -165,6 +179,60 @@ Shader "WarStrategy/MapShader"
                 return frac((p3.x + p3.y) * p3.z);
             }
 
+            // Smooth value noise (band-limited, no grid artifacts)
+            float smoothNoise(float2 p)
+            {
+                float2 f = frac(p); float2 i = floor(p);
+                float2 s = f * f * (3.0 - 2.0 * f);
+                return lerp(lerp(hash21(i), hash21(i+float2(1,0)), s.x),
+                            lerp(hash21(i+float2(0,1)), hash21(i+float2(1,1)), s.x), s.y);
+            }
+
+            // Atlas palette mapping — pushes colors toward curated warm tones
+            float3 PaletteMap(float3 col)
+            {
+                float lum = dot(col, float3(0.299, 0.587, 0.114));
+                float3 shadows = float3(0.48, 0.50, 0.53);
+                float3 mid     = float3(0.92, 0.88, 0.78);
+                float3 highs   = float3(1.00, 0.96, 0.88);
+                float3 palette = lerp(shadows, mid, smoothstep(0.2, 0.6, lum));
+                palette = lerp(palette, highs, smoothstep(0.6, 1.0, lum));
+                return lerp(col, col * palette, 0.30); // light touch — preserve terrain richness
+            }
+
+            // Procedural biome coloring from terrain_types + heightmap
+            float3 BiomeColor(float terrainTypeRaw, float height, float2 uv)
+            {
+                // Curated palette per biome — rich, saturated, painterly
+                float3 desert_lo  = float3(0.88, 0.72, 0.40); float3 desert_hi  = float3(0.80, 0.60, 0.32);
+                float3 plains_lo  = float3(0.72, 0.72, 0.40); float3 plains_hi  = float3(0.62, 0.58, 0.35);
+                float3 forest_lo  = float3(0.25, 0.52, 0.22); float3 forest_hi  = float3(0.18, 0.42, 0.15);
+                float3 mount_lo   = float3(0.60, 0.52, 0.38); float3 mount_hi   = float3(0.50, 0.45, 0.35);
+                float3 tundra_lo  = float3(0.72, 0.74, 0.72); float3 tundra_hi  = float3(0.65, 0.67, 0.66);
+                float3 jungle_lo  = float3(0.18, 0.55, 0.18); float3 jungle_hi  = float3(0.14, 0.46, 0.12);
+
+                int biome = clamp((int)(terrainTypeRaw * 255.0 + 0.5), 0, 5);
+                float h = saturate(height);
+
+                float3 col;
+                if      (biome == 0) col = lerp(plains_lo, plains_hi, h);
+                else if (biome == 1) col = lerp(forest_lo, forest_hi, h);
+                else if (biome == 2) col = lerp(mount_lo,  mount_hi,  h);
+                else if (biome == 3) col = lerp(desert_lo, desert_hi, h);
+                else if (biome == 4) col = lerp(tundra_lo, tundra_hi, h);
+                else                 col = lerp(jungle_lo, jungle_hi, h);
+
+                // Natural variation within biome — breaks uniformity
+                float nv = smoothNoise(uv * 3.0);
+                col *= 0.90 + 0.20 * nv;
+
+                // Cross-biome edge softening: sample neighbors and blend
+                float nv2 = smoothNoise(uv * 7.0 + float2(31.0, 17.0));
+                col *= 0.97 + 0.06 * nv2;
+
+                return col;
+            }
+
             Varyings vert(Attributes input)
             {
                 Varyings output;
@@ -207,6 +275,8 @@ Shader "WarStrategy/MapShader"
                 // ── Heightmap ──
                 float height = 0.0;
                 float relief = 0.0;
+                float dx = 0.0;
+                float dy = 0.0;
                 if (_HasHeightmap > 0.5)
                 {
                     height = SAMPLE_TEXTURE2D(_HeightmapTex, sampler_HeightmapTex, uv).r;
@@ -214,8 +284,8 @@ Shader "WarStrategy/MapShader"
                     float hR = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, uv + float2( hpx.x, 0), 0).r;
                     float hU = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, uv + float2(0, -hpx.y), 0).r;
                     float hD = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, uv + float2(0,  hpx.y), 0).r;
-                    float dx = (hR - hL);
-                    float dy = (hD - hU);
+                    dx = (hR - hL);
+                    dy = (hD - hU);
                     relief = (-dx + dy) * _ElevationStrength;
                 }
 
@@ -240,21 +310,12 @@ Shader "WarStrategy/MapShader"
                     // Underwater relief
                     col *= clamp(1.0 + relief * 0.15, 0.9, 1.1);
 
-                    // Animated ocean waves (smooth value noise, no grid artifacts)
+                    // Animated ocean waves (smooth value noise, reduced frequency)
                     float t = _Time.y * 0.08;
-                    float2 waveUV1 = uv * 80.0 + float2(t, t * 0.7);
-                    float2 waveUV2 = uv * 120.0 + float2(-t * 0.6, t * 0.4);
-                    // Smooth interpolated noise instead of floor() hash
-                    float2 f1 = frac(waveUV1); float2 i1 = floor(waveUV1);
-                    float2 s1 = f1 * f1 * (3.0 - 2.0 * f1); // smoothstep
-                    float wave1 = lerp(lerp(hash21(i1), hash21(i1 + float2(1,0)), s1.x),
-                                       lerp(hash21(i1 + float2(0,1)), hash21(i1 + float2(1,1)), s1.x), s1.y);
-                    float2 f2 = frac(waveUV2); float2 i2 = floor(waveUV2);
-                    float2 s2 = f2 * f2 * (3.0 - 2.0 * f2);
-                    float wave2 = lerp(lerp(hash21(i2), hash21(i2 + float2(1,0)), s2.x),
-                                       lerp(hash21(i2 + float2(0,1)), hash21(i2 + float2(1,1)), s2.x), s2.y);
+                    float wave1 = smoothNoise(uv * 30.0 + float2(t, t * 0.7));
+                    float wave2 = smoothNoise(uv * 50.0 + float2(-t * 0.6, t * 0.4));
                     float wavePattern = (wave1 + wave2) * 0.5;
-                    float waveStr = lerp(0.012, 0.025, saturate(1.0 - depth));
+                    float waveStr = lerp(0.008, 0.018, saturate(1.0 - depth));
                     col += (wavePattern - 0.5) * waveStr;
 
                     // Coast glow — 3×3 neighbor check (8 samples instead of 24)
@@ -269,9 +330,22 @@ Shader "WarStrategy/MapShader"
                     if (RGBToIndex(SampleProv(uv + float2( px.x,  px.y))) > 0) coastDist += 0.7;
                     coastDist = saturate(coastDist * 0.12);
 
+                    // Coastal depth gradient — shallow water near land
+                    float coastGradient = saturate(1.0 - coastDist * 3.0);
+                    coastGradient = coastGradient * coastGradient; // quadratic — natural transition
+                    float3 shallowWater = float3(0.42, 0.58, 0.55);
+                    col = lerp(col, shallowWater, coastGradient * 0.4);
+
                     // Warm coast glow with slight color shift
-                    float3 coastColor = lerp(_OceanShallow.rgb, float3(0.18, 0.30, 0.42), 0.3);
+                    float3 coastColor = lerp(_OceanShallow.rgb, float3(0.38, 0.52, 0.56), 0.3);
                     col = lerp(col, coastColor, coastDist * _CoastGlowStr * 2.0);
+
+                    // Procedural coastal foam
+                    float foamNoise = smoothNoise(uv * 40.0 + _Time.y * 0.1);
+                    float foamLine = smoothstep(0.02, 0.12, coastDist) * (1.0 - smoothstep(0.12, 0.25, coastDist));
+                    float foamFade = saturate((_ZoomLevel - 1.5) / 3.0);
+                    float foam = foamLine * smoothstep(0.4, 0.7, foamNoise) * 0.35 * foamFade;
+                    col = lerp(col, float3(0.85, 0.9, 0.92), foam);
 
                     // Noise for ocean texture
                     if (_HasNoise > 0.5)
@@ -289,10 +363,26 @@ Shader "WarStrategy/MapShader"
                     float zoomFade = 1.0 - saturate((_ZoomLevel - _ZoomTerrainStart) / (_ZoomTerrainEnd - _ZoomTerrainStart));
                     float colorStr = _CountryColorStr * zoomFade;
 
-                    // Step 1: Start with terrain as base
-                    float terrLum = Lum(terrain);
+                    // Step 1: Blend terrain texture with procedural biome coloring
+                    float3 biomeBase = terrain;
+                    if (_HasTerrainTypes > 0.5 && _HasTerrain > 0.5)
+                    {
+                        // Blend: terrain.png provides real geography, BiomeColor provides palette warmth
+                        float tt = SAMPLE_TEXTURE2D(_TerrainTypeTex, sampler_TerrainTypeTex, uv).r;
+                        float3 biomeCol = BiomeColor(tt, height, uv);
+                        // Boost terrain saturation before blending
+                        float tLum = Lum(terrain);
+                        float3 terrSat = lerp(float3(tLum,tLum,tLum), terrain, 1.4); // +40% saturation
+                        biomeBase = terrSat * 0.6 + biomeCol * 0.4;
+                    }
+                    else if (_HasTerrainTypes > 0.5)
+                    {
+                        float tt = SAMPLE_TEXTURE2D(_TerrainTypeTex, sampler_TerrainTypeTex, uv).r;
+                        biomeBase = BiomeColor(tt, height, uv);
+                    }
+                    float terrLum = Lum(biomeBase);
                     float desatAmount = _TerrainDesat * zoomFade;
-                    float3 terrBase = Desat(terrain, desatAmount);
+                    float3 terrBase = Desat(biomeBase, desatAmount);
 
                     // Step 2: Tint terrain with country color (fades with zoom)
                     float3 tinted = terrBase * lerp(float3(1,1,1), countryCol * 1.8, colorStr);
@@ -315,38 +405,88 @@ Shader "WarStrategy/MapShader"
                             float ar = (float)(bi / 3);
                             float2 buv = float2((ac + frac(uv.x * 12.0)) / 3.0, (ar + frac(uv.y * 12.0)) / 2.0);
                             float3 bc = SAMPLE_TEXTURE2D(_BiomeAtlas, sampler_BiomeAtlas, buv).rgb;
+                            // Second rotated sample breaks visible tiling repetition
+                            float2 buv2 = float2((ac + frac(uv.x * 17.3 + smoothNoise(uv * 3.0) * 0.1)) / 3.0,
+                                                  (ar + frac(uv.y * 17.3)) / 2.0);
+                            float3 bc2 = SAMPLE_TEXTURE2D(_BiomeAtlas, sampler_BiomeAtlas, buv2).rgb;
+                            bc = bc * 0.6 + bc2 * 0.4;
                             col = lerp(col, col * bc, _BiomeDetailStrength * zf);
                         }
                     }
 
-                    // Step 4: Elevation relief
+                    // Step 4: Directional hillshading + AO + elevation color + snow
                     if (_HasHeightmap > 0.5)
                     {
-                        col *= clamp(1.0 + relief, 0.6, 1.4);
-                        col *= lerp(1.0, 0.85, saturate((height - 0.5) * 2.0));
+                        // Reconstruct normal from heightmap gradient (dx/dy computed earlier)
+                        float3 normal = normalize(float3(-dx * _ElevationStrength, -dy * _ElevationStrength, 1.0));
+                        float3 sunDir = normalize(float3(-0.45, 0.3, 0.75)); // NW sun
+                        float diffuse = max(dot(normal, sunDir), 0.0);
+                        float lighting = 0.65 + 0.35 * diffuse;
+                        // Valley AO
+                        float grad = sqrt(dx*dx + dy*dy);
+                        float ao = saturate(1.0 - grad * _ElevationStrength * 0.8);
+                        lighting *= lerp(0.88, 1.0, ao);
+                        col *= clamp(lighting, 0.65, 1.25);
+                        // Elevation color shift: warm lowlands, slightly cool highlands
+                        float3 lowTint  = float3(1.02, 0.98, 0.92); // warm boost
+                        float3 highTint = float3(0.92, 0.92, 0.94); // barely cool
+                        col *= lerp(lowTint, highTint, saturate(height * 0.4));
+                        // Snow on mountain peaks
+                        float snowMask = smoothstep(_SnowHeight, _SnowHeight + 0.12, height);
+                        // Snow is brighter on sun-facing slopes
+                        float snowLight = 0.85 + 0.15 * diffuse;
+                        float3 snowColor = float3(0.92, 0.93, 0.95) * snowLight;
+                        col = lerp(col, snowColor, snowMask * _SnowStr);
+
+                        // Rivers: detect valley channels from heightmap gradient
+                        float valleyDepth = saturate(0.3 - height) * 3.0;
+                        float riverWidth = saturate(grad * _ElevationStrength - 0.15) * valleyDepth;
+                        riverWidth *= smoothstep(0.0, 0.02, riverWidth); // sharpen edges
+                        float3 riverColor = float3(0.15, 0.28, 0.40);
+                        col = lerp(col, riverColor, saturate(riverWidth * 0.6));
                     }
 
-                    // Step 5: Micro-detail noise
+                    // Step 5: Unified noise system (smooth, zoom-aware)
                     if (_HasNoise > 0.5)
                     {
-                        float n1 = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, uv * 3.0).r;
-                        float n2 = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, uv * 12.0).r;
-                        col += (n1 - 0.5) * _NoiseStr;
-                        col += (n2 - 0.5) * _NoiseStr * 0.4;
+                        float n1 = smoothNoise(uv * 1.5);   // broad terrain variation
+                        float n2 = smoothNoise(uv * 5.0);   // regional variation
+                        float noiseMix = (n1 - 0.5) * _NoiseStr + (n2 - 0.5) * _NoiseStr * 0.4;
+                        // Detail: stronger when zoomed in (two zoom tiers)
+                        float detailZoom = saturate((_ZoomLevel - 3.0) / 5.0);
+                        if (_HasDetail > 0.5 && detailZoom > 0.01)
+                        {
+                            float d = smoothNoise(uv * 8.0);
+                            noiseMix += (d - 0.5) * _DetailStrength * detailZoom;
+                            // Extra close-up terrain texture (zoom 6+)
+                            float closeZoom = saturate((_ZoomLevel - 6.0) / 6.0);
+                            if (closeZoom > 0.01)
+                            {
+                                float d2 = smoothNoise(uv * 20.0);
+                                noiseMix += (d2 - 0.5) * _DetailStrength * 0.5 * closeZoom;
+                            }
+                        }
+                        col += noiseMix;
                     }
 
-                    if (_HasDetail > 0.5)
-                        col += (SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, uv * 24.0).r - 0.5) * _DetailStrength;
-
-                    // Step 6: Paper/parchment tint
+                    // Step 6: Paper texture with directional fibers
                     float paperStr = _PaperStrength * zoomFade;
-                    col = Desat(col, paperStr * 0.3);
-                    col = lerp(col, col * _PaperTint.rgb, paperStr);
+                    if (paperStr > 0.01)
+                    {
+                        float pn1 = smoothNoise(uv * 5.0 + float2(42.0, 17.0));
+                        float pn2 = smoothNoise(uv * 15.0 + float2(13.0, 31.0));
+                        float paperNoise = pn1 * 0.6 + pn2 * 0.4;
+                        float fiber = sin((uv.x + pn1 * 0.1) * 120.0) * 0.03; // stronger fibers
+                        paperNoise += fiber;
+                        float3 paperCol = _PaperTint.rgb * lerp(0.94, 1.06, paperNoise); // wider variation
+                        col = Desat(col, paperStr * 0.12);
+                        col = lerp(col, col * paperCol, paperStr);
+                    }
 
-                    // Step 7: Coast darkening
+                    // Step 7: Coast darkening (softened)
                     bool nearCoast = (idxL == 0 || idxR == 0 || idxU == 0 || idxD == 0);
                     if (nearCoast)
-                        col *= 0.82;
+                        col *= 0.93;
 
                     // Step 8: Anti-alias province boundaries
                     if (edgeFactor > 0.01 && nCount > 0)
@@ -355,6 +495,11 @@ Shader "WarStrategy/MapShader"
                         blendedNeighbor = terrBase * lerp(float3(1,1,1), blendedNeighbor * 1.8, _CountryColorStr);
                         col = lerp(col, blendedNeighbor, edgeFactor * 0.35);
                     }
+
+                    // ── Micro color variation + palette mapping + global harmony ──
+                    col *= 0.98 + 0.04 * smoothNoise(uv * 2.0);
+                    col = PaletteMap(col);
+                    col = lerp(col, col * float3(1.0, 0.97, 0.93), 0.6);
 
                     // ── Step 9: GPU Border Detection (integer comparison, 8-neighbor AA) ──
                     // If center pixel itself is an interpolated artifact (owner=0, idx>0),
@@ -445,10 +590,17 @@ Shader "WarStrategy/MapShader"
                     float provBorderFade = saturate((_ZoomLevel - _ProvBorderZoomStart) / (_ProvBorderZoomEnd - _ProvBorderZoomStart));
 
                     if (countryEdgeW > 0.01 && countryBorderFade > 0.01)
-                        col = lerp(col, float3(0.02, 0.02, 0.03), 0.9 * countryEdgeW * countryBorderFade);
+                    {
+                        float3 inkColor = float3(0.15, 0.12, 0.08); // very dark ink — prominent borders
+                        float inkNoise = 0.88 + 0.12 * smoothNoise(uv * 20.0);
+                        float borderStr = 0.85 * countryEdgeW * countryBorderFade * inkNoise;
+                        col = lerp(col, col * inkColor, borderStr);
+                        // Inner glow — warm edge light
+                        col += countryEdgeW * countryBorderFade * float3(0.06, 0.04, 0.02) * (1.0 - borderStr);
+                    }
 
                     if (provEdgeW > 0.01 && provBorderFade > 0.01)
-                        col = lerp(col, col * 0.75, 0.3 * provEdgeW * provBorderFade);
+                        col = lerp(col, col * 0.80, 0.25 * provEdgeW * provBorderFade);
 
                     // ── Player territory highlight ──
                     int playerOwnerId = (int)(_PlayerOwnerValue * 255.0 + 0.5);
@@ -469,18 +621,16 @@ Shader "WarStrategy/MapShader"
                         {
                             if (ownerC == selectedOwnerId)
                             {
-                                // Selected country: brighten slightly
-                                col = col * (1.0 + 0.12 * _SelectionDarken);
-                                // Add subtle warm tint
-                                col = lerp(col, col * float3(1.05, 1.02, 0.95), 0.3 * _SelectionDarken);
+                                // Selected country: brighten and saturate — make it pop
+                                col = col * (1.0 + 0.25 * _SelectionDarken);
+                                col = lerp(col, col * float3(1.08, 1.04, 0.92), 0.4 * _SelectionDarken);
                             }
                             else
                             {
-                                // Other countries: darken
-                                col *= lerp(1.0, 0.45, _SelectionDarken);
-                                // Slight desaturation for darkened areas
+                                // Other countries: darken significantly + desaturate
+                                col *= lerp(1.0, 0.35, _SelectionDarken);
                                 float lum = dot(col, float3(0.299, 0.587, 0.114));
-                                col = lerp(col, float3(lum, lum, lum), 0.3 * _SelectionDarken);
+                                col = lerp(col, float3(lum, lum, lum), 0.4 * _SelectionDarken);
                             }
                         }
                     }
@@ -488,8 +638,8 @@ Shader "WarStrategy/MapShader"
                     // ── Interactive: Hover & Selection ──
                     if (_HoverProvinceIndex >= 0 && idx == _HoverProvinceIndex)
                     {
-                        // Subtle brightening with slight desaturation for hover
-                        col = lerp(col, col * 1.25 + float3(0.03, 0.03, 0.04), 0.45);
+                        col *= 1.08;
+                        col += float3(0.03, 0.02, 0.01); // warm shift
                     }
 
                     if (_SelectedProvinceIndex >= 0 && idx == _SelectedProvinceIndex)
@@ -502,8 +652,34 @@ Shader "WarStrategy/MapShader"
                         if (selEdge)
                             col = lerp(col, _SelectionColor.rgb, 0.85);
                         else
-                            col *= 1.1;
+                            col *= 1.06; // subtle interior highlight
                     }
+                }
+
+                // ════════════════════════════════════════
+                // GLOBAL EFFECTS — applied to both ocean and land
+                // ════════════════════════════════════════
+
+                // Cloud overlay (fade out at high zoom)
+                float cloudFade = 1.0 - saturate((_ZoomLevel - 4.0) / 4.0);
+                if (cloudFade > 0.01 && _CloudStr > 0.01)
+                {
+                    float cloud1 = smoothNoise(uv * _CloudScale + _Time.y * float2(_CloudSpeed, _CloudSpeed * 0.7));
+                    float cloud2 = smoothNoise(uv * _CloudScale * 2.3 + _Time.y * float2(-_CloudSpeed * 0.6, _CloudSpeed * 0.4) + float2(7,13));
+                    float clouds = smoothstep(0.35, 0.65, cloud1 * 0.6 + cloud2 * 0.4);
+                    float cloudMask = (idx > 0) ? 1.0 : 0.6; // stronger on land
+                    float3 cloudCol = Desat(col * 0.88 + float3(0.04, 0.04, 0.05), 0.15);
+                    col = lerp(col, cloudCol, clouds * _CloudStr * cloudFade * cloudMask);
+                }
+
+                // Distance fog (atmospheric haze at viewport edges)
+                if (_FogStr > 0.01)
+                {
+                    float2 screenUV = input.positionCS.xy / _ScreenParams.xy;
+                    float dist = length(screenUV - float2(0.5, 0.5)) * 2.0;
+                    dist *= 0.7 + 0.3 * _ZoomLevel;
+                    float fog = smoothstep(0.6, 1.3, dist) * _FogStr;
+                    col = lerp(col, _FogColor.rgb, fog);
                 }
 
                 return half4(saturate(col), 1.0);

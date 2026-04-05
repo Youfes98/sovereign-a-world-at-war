@@ -14,17 +14,23 @@ namespace WarStrategy.Map
     {
         public const float MAP_WIDTH = 16384f;
         public const int POOL_SIZE = 60;
+        public const int CITY_POOL_SIZE = 80;
+        public const float CITY_ZOOM_THRESHOLD = 3f;
 
         [Header("Colors")]
         public Color TextColor = new(1f, 1f, 1f, 0.88f);
         public Color ShadowColor = new(0f, 0f, 0f, 0.6f);
         public Color PlayerColor = new(0.95f, 0.95f, 0.98f, 1f);
+        public Color CityTextColor = new(0.95f, 0.92f, 0.85f, 0.85f);
 
         private MapCamera _mapCamera;
         private TMP_FontAsset _font;
         private TextMeshPro[] _labelPool;
         private TextMeshPro[] _shadowPool;
+        private TextMeshPro[] _cityLabelPool;
+        private TextMeshPro[] _cityShadowPool;
         private int _activeCount;
+        private int _activeCityCount;
 
         // Dirty tracking — skip layout when camera hasn't moved
         private Vector3 _lastCamPos;
@@ -34,6 +40,9 @@ namespace WarStrategy.Map
         private List<LabelEntry> _entries = new();
         private List<Rect> _usedRects = new(64); // reused each frame, no GC
 
+        // City label data (sorted by population descending)
+        private List<CityEntry> _cityEntries = new();
+
         private struct LabelEntry
         {
             public string Iso;
@@ -41,6 +50,14 @@ namespace WarStrategy.Map
             public Vector2 Position; // map-space centroid
             public float Area;       // for priority sorting
             public bool IsPlayer;
+        }
+
+        private struct CityEntry
+        {
+            public string CountryIso;
+            public string DisplayText; // pre-formatted "CityName, 1.2M"
+            public Vector2 Position;   // map-space capital centroid
+            public long Population;    // for priority sorting
         }
 
         private void Start()
@@ -91,6 +108,35 @@ namespace WarStrategy.Map
                 textGO.SetActive(false);
                 _labelPool[i] = label;
             }
+
+            // City label pool (same pattern, separate objects)
+            _cityLabelPool = new TextMeshPro[CITY_POOL_SIZE];
+            _cityShadowPool = new TextMeshPro[CITY_POOL_SIZE];
+
+            for (int i = 0; i < CITY_POOL_SIZE; i++)
+            {
+                var shadowGO = new GameObject($"CityShadow_{i}");
+                shadowGO.transform.SetParent(transform);
+                var shadow = shadowGO.AddComponent<TextMeshPro>();
+                shadow.alignment = TextAlignmentOptions.Center;
+                shadow.color = ShadowColor;
+                shadow.sortingOrder = 11;
+                shadow.textWrappingMode = TextWrappingModes.NoWrap;
+                if (_font != null) shadow.font = _font;
+                shadowGO.SetActive(false);
+                _cityShadowPool[i] = shadow;
+
+                var textGO = new GameObject($"CityLabel_{i}");
+                textGO.transform.SetParent(transform);
+                var label = textGO.AddComponent<TextMeshPro>();
+                label.alignment = TextAlignmentOptions.Center;
+                label.color = CityTextColor;
+                label.sortingOrder = 12;
+                label.textWrappingMode = TextWrappingModes.NoWrap;
+                if (_font != null) label.font = _font;
+                textGO.SetActive(false);
+                _cityLabelPool[i] = label;
+            }
         }
 
         /// <summary>
@@ -114,6 +160,49 @@ namespace WarStrategy.Map
 
             // Sort by area descending — largest countries get priority
             _entries.Sort((a, b) => b.Area.CompareTo(a.Area));
+        }
+
+        /// <summary>
+        /// Set a single city/capital for label rendering.
+        /// Call once per country after data is loaded, and again on territory changes.
+        /// </summary>
+        public void SetCityData(string countryIso, string cityName, Vector2 centroid, long population)
+        {
+            if (string.IsNullOrEmpty(cityName) || centroid == Vector2.zero) return;
+
+            _cityEntries.Add(new CityEntry
+            {
+                CountryIso = countryIso,
+                DisplayText = $"{cityName}, {FormatPopulation(population)}",
+                Position = centroid,
+                Population = population
+            });
+
+            // Keep sorted by population descending — largest cities get priority
+            _cityEntries.Sort((a, b) => b.Population.CompareTo(a.Population));
+        }
+
+        /// <summary>
+        /// Clear all city entries (call before re-feeding data).
+        /// </summary>
+        public void ClearCityData()
+        {
+            _cityEntries.Clear();
+        }
+
+        private static string FormatPopulation(long pop)
+        {
+            if (pop >= 1_000_000)
+            {
+                float millions = pop / 1_000_000f;
+                return millions >= 10f ? $"{millions:F0}M" : $"{millions:F1}M";
+            }
+            if (pop >= 1_000)
+            {
+                float thousands = pop / 1_000f;
+                return thousands >= 10f ? $"{thousands:F0}k" : $"{thousands:F1}k";
+            }
+            return pop.ToString();
         }
 
         private void LateUpdate()
@@ -230,12 +319,90 @@ namespace WarStrategy.Map
                 }
             }
 
-            // Hide unused pool entries
+            // Hide unused country pool entries
             _activeCount = poolIdx;
             for (int i = poolIdx; i < POOL_SIZE; i++)
             {
                 _labelPool[i].gameObject.SetActive(false);
                 _shadowPool[i].gameObject.SetActive(false);
+            }
+
+            // ── City / capital labels — only visible when zoomed in ──
+            int cityPoolIdx = 0;
+
+            if (zoom >= CITY_ZOOM_THRESHOLD && _cityEntries.Count > 0)
+            {
+                // City font is 65% of country base size
+                float cityBaseSize = baseSize * 0.65f;
+
+                foreach (var city in _cityEntries)
+                {
+                    if (cityPoolIdx >= CITY_POOL_SIZE) break;
+
+                    foreach (float xOff in xOffsets)
+                    {
+                        if (cityPoolIdx >= CITY_POOL_SIZE) break;
+
+                        Vector3 worldPos = new(city.Position.x + xOff, -city.Position.y, 0);
+
+                        // Frustum cull
+                        if (!viewRect.Contains(new Vector2(worldPos.x, worldPos.y)))
+                            continue;
+
+                        // Estimate label rect for overlap check (shared with country labels)
+                        float labelScale = 1f / zoom;
+                        float estWidth = city.DisplayText.Length * cityBaseSize * 0.5f * labelScale;
+                        float estHeight = cityBaseSize * 1.2f * labelScale;
+                        Rect labelRect = new(worldPos.x - estWidth * 0.5f, worldPos.y - estHeight * 0.5f,
+                                            estWidth, estHeight);
+
+                        // Check overlap against ALL used rects (country + earlier cities)
+                        bool blocked = false;
+                        foreach (var used in _usedRects)
+                        {
+                            if (labelRect.Overlaps(used))
+                            {
+                                blocked = true;
+                                break;
+                            }
+                        }
+
+                        if (blocked) continue;
+
+                        _usedRects.Add(labelRect);
+
+                        // Assign from city pool
+                        var label = _cityLabelPool[cityPoolIdx];
+                        var shadow = _cityShadowPool[cityPoolIdx];
+
+                        label.gameObject.SetActive(true);
+                        shadow.gameObject.SetActive(true);
+
+                        label.text = city.DisplayText;
+                        label.fontSize = cityBaseSize;
+                        label.color = CityTextColor;
+                        label.transform.position = worldPos;
+
+                        float shadowOff = Mathf.Max(1f, cityBaseSize * 0.08f);
+                        shadow.text = city.DisplayText;
+                        shadow.fontSize = cityBaseSize;
+                        shadow.transform.position = worldPos + new Vector3(shadowOff, -shadowOff, 0.01f);
+
+                        // Scale labels inversely with zoom so they stay readable
+                        label.transform.localScale = Vector3.one * labelScale;
+                        shadow.transform.localScale = Vector3.one * labelScale;
+
+                        cityPoolIdx++;
+                    }
+                }
+            }
+
+            // Hide unused city pool entries
+            _activeCityCount = cityPoolIdx;
+            for (int i = cityPoolIdx; i < CITY_POOL_SIZE; i++)
+            {
+                _cityLabelPool[i].gameObject.SetActive(false);
+                _cityShadowPool[i].gameObject.SetActive(false);
             }
         }
     }
