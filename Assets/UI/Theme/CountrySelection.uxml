@@ -1,0 +1,40 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         engine="UnityEngine.UIElements"
+         editor="UnityEditor.UIElements">
+
+    <Style src="GrandStrategyTheme.uss" />
+    <Style src="CountrySelection.uss" />
+
+    <!-- Root fullscreen container -->
+    <ui:VisualElement class="full-screen country-selection-root">
+
+        <!-- Top Bar -->
+        <ui:VisualElement class="top-bar">
+            <ui:Button name="back-btn" text="&lt; BACK" class="btn-secondary back-btn" />
+            <ui:Label text="SELECT YOUR NATION" class="title-lg top-bar-title" />
+            <ui:TextField name="search-field" class="search-field" />
+        </ui:VisualElement>
+
+        <!-- Content Area (horizontal) -->
+        <ui:VisualElement class="content-area">
+
+            <!-- Left Sidebar -->
+            <ui:VisualElement class="sidebar-panel panel-frame-no-pad">
+                <ui:ScrollView name="country-list" class="dark-scrollview country-list-scroll" />
+            </ui:VisualElement>
+
+            <!-- Center (transparent, map shows through) -->
+            <ui:VisualElement class="center-area" picking-mode="Ignore" />
+
+            <!-- Right Info Panel (initially hidden) -->
+            <ui:VisualElement name="info-panel" class="info-panel panel-frame hidden">
+                <!-- CountryInfoPanel content loaded here -->
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

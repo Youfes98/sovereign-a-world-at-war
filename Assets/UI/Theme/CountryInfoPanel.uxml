@@ -1,0 +1,94 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         xsi="http://www.w3.org/2001/XMLSchema-instance"
+         engine="UnityEngine.UIElements"
+         editor="UnityEditor.UIElements">
+
+    <Style src="GrandStrategyTheme.uss" />
+    <Style src="CountryInfoPanel.uss" />
+
+    <ui:VisualElement class="info-panel-root">
+
+        <!-- Header -->
+        <ui:VisualElement class="info-header">
+            <ui:VisualElement name="flag-image" class="flag-image" />
+            <ui:Label name="country-name" text="COUNTRY NAME" class="heading-lg info-country-name" />
+            <ui:Label name="govt-type" text="Government Type" class="label-sm info-govt-type" />
+            <ui:Label name="region-label" text="Region / Subregion" class="body-sm info-region" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="separator" />
+
+        <!-- Stats -->
+        <ui:VisualElement class="info-stats">
+
+            <!-- GDP -->
+            <ui:VisualElement class="stat-row">
+                <ui:Label text="GDP" class="stat-label" />
+                <ui:VisualElement class="stat-bar-container">
+                    <ui:VisualElement name="gdp-bar" class="stat-bar-fill stat-bar-fill-gold" />
+                </ui:VisualElement>
+                <ui:Label name="gdp-value" text="$0.0B" class="stat-value" />
+            </ui:VisualElement>
+
+            <!-- Population -->
+            <ui:VisualElement class="stat-row">
+                <ui:Label text="Population" class="stat-label" />
+                <ui:VisualElement class="stat-bar-container">
+                    <ui:VisualElement name="pop-bar" class="stat-bar-fill" />
+                </ui:VisualElement>
+                <ui:Label name="pop-value" text="0" class="stat-value" />
+            </ui:VisualElement>
+
+            <!-- Military -->
+            <ui:VisualElement class="stat-row">
+                <ui:Label text="Military" class="stat-label" />
+                <ui:VisualElement class="stat-bar-container">
+                    <ui:VisualElement name="mil-bar" class="stat-bar-fill stat-bar-fill-red" />
+                </ui:VisualElement>
+                <ui:Label name="mil-value" text="0" class="stat-value" />
+            </ui:VisualElement>
+
+            <!-- Stability -->
+            <ui:VisualElement class="stat-row">
+                <ui:Label text="Stability" class="stat-label" />
+                <ui:VisualElement class="stat-bar-container">
+                    <ui:VisualElement name="stability-bar" class="stat-bar-fill stat-bar-fill-green" />
+                </ui:VisualElement>
+                <ui:Label name="stability-value" text="0" class="stat-value" />
+            </ui:VisualElement>
+
+            <!-- Infrastructure -->
+            <ui:VisualElement class="stat-row">
+                <ui:Label text="Infrastructure" class="stat-label" />
+                <ui:VisualElement class="stat-bar-container">
+                    <ui:VisualElement name="infra-bar" class="stat-bar-fill" />
+                </ui:VisualElement>
+                <ui:Label name="infra-value" text="0" class="stat-value" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <ui:VisualElement class="separator" />
+
+        <!-- Tier & Difficulty -->
+        <ui:VisualElement class="info-meta-row">
+            <ui:VisualElement class="info-meta-item">
+                <ui:Label text="POWER TIER" class="label-dim" />
+                <ui:Label name="tier-badge" text="S" class="tier-badge tier-S" />
+            </ui:VisualElement>
+            <ui:VisualElement class="info-meta-item">
+                <ui:Label text="DIFFICULTY" class="label-dim" />
+                <ui:Label name="difficulty-label" text="Easy" class="difficulty-label" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Spacer -->
+        <ui:VisualElement class="grow" />
+
+        <!-- Play Button -->
+        <ui:Button name="play-btn" text="PLAY AS COUNTRY" class="btn-gold play-btn" />
+
+    </ui:VisualElement>
+
+</ui:UXML>

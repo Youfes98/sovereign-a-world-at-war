@@ -1,0 +1,323 @@
+/* GrandStrategyTheme.uss — Global dark navy theme for War Strategy Game */
+/* Inspired by Victoria 3 / Stellaris UI design language */
+
+/* ══════════════════════════════════════════════════════════════
+   COLOR VARIABLES
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+    /* Backgrounds */
+    --bg-deep: #0B1426;
+    --bg-panel: #111D33;
+    --bg-panel-hover: #1A2A44;
+    --bg-input: #0D1829;
+    --bg-overlay: rgba(11, 20, 38, 0.85);
+
+    /* Accents */
+    --accent-gold: #D4A843;
+    --accent-gold-dim: #A88535;
+    --accent-blue: #4A9EEB;
+    --accent-blue-hover: #6BB3F0;
+    --accent-blue-pressed: #3A8AD6;
+
+    /* Text */
+    --text-primary: #E8E8E8;
+    --text-secondary: #8899AA;
+    --text-dim: #556677;
+    --text-gold: #D4A843;
+
+    /* Borders */
+    --border-subtle: #1E3050;
+    --border-active: #4A9EEB;
+    --border-gold: #D4A843;
+
+    /* Status */
+    --color-success: #27AE60;
+    --color-warning: #F39C12;
+    --color-danger: #C0392B;
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 40px;
+
+    /* Radius */
+    --radius-sm: 3px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TYPOGRAPHY
+   ══════════════════════════════════════════════════════════════ */
+
+.title-xl {
+    font-size: 42px;
+    color: var(--accent-gold);
+    -unity-font-style: bold;
+    letter-spacing: 4px;
+}
+
+.title-lg {
+    font-size: 28px;
+    color: var(--accent-gold);
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+}
+
+.heading-lg {
+    font-size: 22px;
+    color: var(--text-primary);
+    -unity-font-style: bold;
+}
+
+.heading-md {
+    font-size: 18px;
+    color: var(--text-primary);
+    -unity-font-style: bold;
+}
+
+.body-md {
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.body-sm {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.label-sm {
+    font-size: 11px;
+    color: var(--text-secondary);
+    -unity-font-style: italic;
+}
+
+.label-dim {
+    font-size: 10px;
+    color: var(--text-dim);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PANEL FRAME
+   ══════════════════════════════════════════════════════════════ */
+
+.panel-frame {
+    background-color: var(--bg-panel);
+    border-width: 1px;
+    border-color: var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+}
+
+.panel-frame-no-pad {
+    background-color: var(--bg-panel);
+    border-width: 1px;
+    border-color: var(--border-subtle);
+    border-radius: var(--radius-md);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BUTTONS
+   ══════════════════════════════════════════════════════════════ */
+
+.btn-primary {
+    background-color: var(--accent-blue);
+    color: white;
+    border-width: 0;
+    border-radius: var(--radius-sm);
+    padding: 12px 24px;
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    cursor: link;
+    transition-property: background-color;
+    transition-duration: 0.15s;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-blue-hover);
+}
+
+.btn-primary:active {
+    background-color: var(--accent-blue-pressed);
+}
+
+.btn-secondary {
+    background-color: rgba(0, 0, 0, 0);
+    color: var(--text-primary);
+    border-width: 1px;
+    border-color: var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 12px 24px;
+    font-size: 16px;
+    -unity-text-align: middle-center;
+    cursor: link;
+    transition-property: background-color, border-color;
+    transition-duration: 0.15s;
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-panel-hover);
+    border-color: var(--accent-blue);
+}
+
+.btn-danger {
+    background-color: rgba(0, 0, 0, 0);
+    color: var(--color-danger);
+    border-width: 1px;
+    border-color: var(--color-danger);
+    border-radius: var(--radius-sm);
+    padding: 12px 24px;
+    font-size: 16px;
+    -unity-text-align: middle-center;
+    cursor: link;
+    transition-property: background-color;
+    transition-duration: 0.15s;
+}
+
+.btn-danger:hover {
+    background-color: rgba(192, 57, 43, 0.2);
+}
+
+.btn-gold {
+    background-color: var(--accent-gold);
+    color: var(--bg-deep);
+    border-width: 0;
+    border-radius: var(--radius-sm);
+    padding: 14px 28px;
+    font-size: 18px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    cursor: link;
+    transition-property: background-color;
+    transition-duration: 0.15s;
+}
+
+.btn-gold:hover {
+    background-color: #E0B854;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   STAT BARS
+   ══════════════════════════════════════════════════════════════ */
+
+.stat-bar-container {
+    height: 6px;
+    background-color: var(--bg-deep);
+    border-radius: 3px;
+    overflow: hidden;
+    flex-grow: 1;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background-color: var(--accent-blue);
+    transition-property: width;
+    transition-duration: 0.3s;
+}
+
+.stat-bar-fill-gold {
+    background-color: var(--accent-gold);
+}
+
+.stat-bar-fill-green {
+    background-color: var(--color-success);
+}
+
+.stat-bar-fill-red {
+    background-color: var(--color-danger);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   POWER TIER BADGES
+   ══════════════════════════════════════════════════════════════ */
+
+.tier-badge {
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    min-width: 28px;
+}
+
+.tier-S { background-color: #D4A843; color: #0B1426; }
+.tier-A { background-color: #4A9EEB; color: white; }
+.tier-B { background-color: #27AE60; color: white; }
+.tier-C { background-color: #F39C12; color: #0B1426; }
+.tier-D { background-color: #C0392B; color: white; }
+
+/* ══════════════════════════════════════════════════════════════
+   SEARCH FIELD
+   ══════════════════════════════════════════════════════════════ */
+
+.search-field {
+    background-color: var(--bg-input);
+    border-width: 1px;
+    border-color: var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.search-field:focus {
+    border-color: var(--accent-blue);
+}
+
+.search-field > TextInput {
+    background-color: rgba(0,0,0,0);
+    border-width: 0;
+    color: var(--text-primary);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SCROLLVIEW
+   ══════════════════════════════════════════════════════════════ */
+
+.dark-scrollview {
+    background-color: rgba(0,0,0,0);
+}
+
+.dark-scrollview Scroller {
+    width: 6px;
+}
+
+.dark-scrollview Scroller #unity-slider {
+    background-color: var(--bg-deep);
+    border-radius: 3px;
+}
+
+.dark-scrollview Scroller #unity-dragger {
+    background-color: var(--text-dim);
+    border-radius: 3px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ══════════════════════════════════════════════════════════════ */
+
+.hidden { display: none; }
+.full-screen { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+.row { flex-direction: row; }
+.col { flex-direction: column; }
+.grow { flex-grow: 1; }
+.center { align-items: center; justify-content: center; }
+.gap-sm { margin-bottom: var(--spacing-sm); }
+.gap-md { margin-bottom: var(--spacing-md); }
+.gap-lg { margin-bottom: var(--spacing-lg); }
+
+/* ══════════════════════════════════════════════════════════════
+   SEPARATOR
+   ══════════════════════════════════════════════════════════════ */
+
+.separator {
+    height: 1px;
+    background-color: var(--border-subtle);
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}

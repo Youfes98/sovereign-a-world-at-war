@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+        xmlns:uie="UnityEditor.UIElements"
+        xsi="http://www.w3.org/2001/XMLSchema-instance"
+        engine="UnityEngine.UIElements"
+        editor="UnityEditor.UIElements">
+
+    <Style src="GrandStrategyTheme.uss" />
+    <Style src="MainMenu.uss" />
+
+    <ui:VisualElement name="main-menu-root" class="main-menu-overlay">
+
+        <ui:VisualElement class="menu-center-column">
+            <ui:Label text="WAR STRATEGY" class="title-xl" />
+            <ui:Label text="A World at Stake" class="label-sm" style="color: rgb(212, 175, 55);" />
+
+            <ui:VisualElement style="height: 40px;" />
+
+            <ui:VisualElement class="menu-button-group">
+                <ui:Button name="new-game-btn" text="NEW GAME" class="btn-gold" />
+                <ui:Button name="load-game-btn" text="LOAD GAME" class="btn-secondary" />
+                <ui:Button name="settings-btn" text="SETTINGS" class="btn-secondary" />
+                <ui:Button name="exit-btn" text="EXIT" class="btn-danger" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:Label text="v0.1.0 Alpha" class="label-dim version-label" />
+    </ui:VisualElement>
+</ui:UXML>

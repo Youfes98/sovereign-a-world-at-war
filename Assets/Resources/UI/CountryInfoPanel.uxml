@@ -1,0 +1,91 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+
+    <ui:VisualElement style="flex-direction: column; align-items: stretch;">
+
+        <!-- Flag -->
+        <ui:VisualElement name="flag-image"
+            style="width: 128px; height: 85px; align-self: center;
+                   margin-bottom: 12px; border-width: 1px; border-color: #1E3050;" />
+
+        <!-- Country Name -->
+        <ui:Label name="country-name" text="Country Name"
+            style="font-size: 20px; color: #D4A843; -unity-font-style: bold;
+                   -unity-text-align: middle-center; margin-bottom: 2px;" />
+
+        <!-- Government -->
+        <ui:Label name="govt-type" text="Republic"
+            style="font-size: 11px; color: #8899AA; -unity-font-style: italic;
+                   -unity-text-align: middle-center; margin-bottom: 4px;" />
+
+        <!-- Region -->
+        <ui:Label name="region-label" text="Region"
+            style="font-size: 12px; color: #8899AA;
+                   -unity-text-align: middle-center; margin-bottom: 12px;" />
+
+        <!-- Separator -->
+        <ui:VisualElement style="height: 1px; background-color: #1E3050; margin-bottom: 12px;" />
+
+        <!-- GDP Row -->
+        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 8px;">
+            <ui:Label text="GDP" style="width: 80px; font-size: 12px; color: #8899AA;" />
+            <ui:Label name="gdp-value" text="$0B"
+                style="flex-grow: 1; font-size: 13px; color: #E8E8E8; -unity-text-align: middle-right;" />
+        </ui:VisualElement>
+
+        <!-- Population Row -->
+        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 8px;">
+            <ui:Label text="Population" style="width: 80px; font-size: 12px; color: #8899AA;" />
+            <ui:Label name="pop-value" text="0"
+                style="flex-grow: 1; font-size: 13px; color: #E8E8E8; -unity-text-align: middle-right;" />
+        </ui:VisualElement>
+
+        <!-- Military Bar -->
+        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 8px;">
+            <ui:Label text="Military" style="width: 80px; font-size: 12px; color: #8899AA;" />
+            <ui:VisualElement style="flex-grow: 1; height: 6px; background-color: #0B1426; border-radius: 3px;">
+                <ui:VisualElement name="mil-bar"
+                    style="height: 100%; width: 50%; background-color: #C0392B; border-radius: 3px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Stability Bar -->
+        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 8px;">
+            <ui:Label text="Stability" style="width: 80px; font-size: 12px; color: #8899AA;" />
+            <ui:VisualElement style="flex-grow: 1; height: 6px; background-color: #0B1426; border-radius: 3px;">
+                <ui:VisualElement name="stability-bar"
+                    style="height: 100%; width: 50%; background-color: #27AE60; border-radius: 3px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Infrastructure Bar -->
+        <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 12px;">
+            <ui:Label text="Infra" style="width: 80px; font-size: 12px; color: #8899AA;" />
+            <ui:VisualElement style="flex-grow: 1; height: 6px; background-color: #0B1426; border-radius: 3px;">
+                <ui:VisualElement name="infra-bar"
+                    style="height: 100%; width: 50%; background-color: #4A9EEB; border-radius: 3px;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Separator -->
+        <ui:VisualElement style="height: 1px; background-color: #1E3050; margin-bottom: 12px;" />
+
+        <!-- Tier + Difficulty Row -->
+        <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: center; margin-bottom: 16px;">
+            <ui:Label name="tier-badge" text="A"
+                style="padding: 2px 10px; border-radius: 3px;
+                       background-color: #4A9EEB; color: white;
+                       font-size: 13px; -unity-font-style: bold;
+                       margin-right: 12px;" />
+            <ui:Label name="difficulty-label" text="Moderate"
+                style="font-size: 13px; color: #F39C12;" />
+        </ui:VisualElement>
+
+        <!-- Play As Button -->
+        <ui:Button name="play-btn" text="PLAY AS COUNTRY"
+            style="height: 44px;
+                   background-color: #D4A843; color: #0B1426;
+                   -unity-font-style: bold; font-size: 15px;
+                   border-width: 0; border-radius: 4px;
+                   -unity-text-align: middle-center;" />
+    </ui:VisualElement>
+</ui:UXML>

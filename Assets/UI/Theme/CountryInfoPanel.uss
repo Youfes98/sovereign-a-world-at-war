@@ -1,0 +1,134 @@
+/* CountryInfoPanel.uss — Right-side country detail panel styles */
+
+/* ══════════════════════════════════════════════════════════════
+   ROOT
+   ══════════════════════════════════════════════════════════════ */
+
+.info-panel-root {
+    flex-direction: column;
+    flex-grow: 1;
+    padding: var(--spacing-md);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   HEADER
+   ══════════════════════════════════════════════════════════════ */
+
+.info-header {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.flag-image {
+    width: 128px;
+    height: 85px;
+    margin-bottom: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    border-color: var(--border-subtle);
+    background-color: var(--bg-deep);
+}
+
+.info-country-name {
+    -unity-text-align: middle-center;
+    margin-bottom: 2px;
+}
+
+.info-govt-type {
+    -unity-text-align: middle-center;
+    margin-bottom: 2px;
+}
+
+.info-region {
+    -unity-text-align: middle-center;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   STAT ROWS
+   ══════════════════════════════════════════════════════════════ */
+
+.info-stats {
+    flex-direction: column;
+}
+
+.stat-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.stat-label {
+    width: 90px;
+    min-width: 90px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    -unity-font-style: bold;
+    flex-shrink: 0;
+}
+
+.stat-row .stat-bar-container {
+    flex-grow: 1;
+    margin-right: var(--spacing-sm);
+}
+
+.stat-value {
+    width: 60px;
+    min-width: 60px;
+    font-size: 12px;
+    color: var(--text-primary);
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TIER & DIFFICULTY ROW
+   ══════════════════════════════════════════════════════════════ */
+
+.info-meta-row {
+    flex-direction: row;
+    justify-content: space-around;
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.info-meta-item {
+    flex-direction: column;
+    align-items: center;
+}
+
+.info-meta-item .label-dim {
+    margin-bottom: var(--spacing-xs);
+    letter-spacing: 1px;
+}
+
+.difficulty-label {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: var(--color-success);
+}
+
+.difficulty-easy {
+    color: var(--color-success);
+}
+
+.difficulty-medium {
+    color: var(--color-warning);
+}
+
+.difficulty-hard {
+    color: var(--color-danger);
+}
+
+.difficulty-vhard {
+    color: #E74C3C;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PLAY BUTTON
+   ══════════════════════════════════════════════════════════════ */
+
+.play-btn {
+    margin-top: var(--spacing-md);
+    align-self: stretch;
+}

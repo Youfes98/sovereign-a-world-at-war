@@ -1,0 +1,39 @@
+/* MainMenu.uss - Menu-specific styles */
+
+.main-menu-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(11, 20, 38, 0.85);
+}
+
+.menu-center-column {
+    width: 400px;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-button-group {
+    width: 320px;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.menu-button-group > Button {
+    margin-bottom: 12px;
+}
+
+.menu-button-group > Button:last-child {
+    margin-bottom: 0;
+}
+
+.version-label {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+}

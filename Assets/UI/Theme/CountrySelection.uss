@@ -1,0 +1,163 @@
+/* CountrySelection.uss — Country selection screen layout */
+
+/* ══════════════════════════════════════════════════════════════
+   ROOT
+   ══════════════════════════════════════════════════════════════ */
+
+.country-selection-root {
+    flex-direction: column;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TOP BAR
+   ══════════════════════════════════════════════════════════════ */
+
+.top-bar {
+    flex-direction: row;
+    align-items: center;
+    height: 48px;
+    min-height: 48px;
+    background-color: var(--bg-panel);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-subtle);
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+}
+
+.back-btn {
+    padding: 6px 16px;
+    font-size: 13px;
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+.top-bar-title {
+    flex-grow: 1;
+    -unity-text-align: middle-center;
+    margin-left: var(--spacing-md);
+    margin-right: var(--spacing-md);
+}
+
+.top-bar .search-field {
+    width: 220px;
+    flex-shrink: 0;
+    height: 32px;
+    padding: 4px 10px;
+    font-size: 13px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CONTENT AREA
+   ══════════════════════════════════════════════════════════════ */
+
+.content-area {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LEFT SIDEBAR
+   ══════════════════════════════════════════════════════════════ */
+
+.sidebar-panel {
+    width: 280px;
+    min-width: 280px;
+    flex-shrink: 0;
+    border-radius: 0;
+    border-right-width: 1px;
+    border-right-color: var(--border-subtle);
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+}
+
+.country-list-scroll {
+    flex-grow: 1;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   COUNTRY LIST ITEMS
+   ══════════════════════════════════════════════════════════════ */
+
+.country-list-item {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(30, 48, 80, 0.5);
+    transition-property: background-color;
+    transition-duration: 0.12s;
+}
+
+.country-list-item:hover {
+    background-color: var(--bg-panel-hover);
+}
+
+.country-list-item--selected {
+    background-color: rgba(74, 158, 235, 0.15);
+    border-left-width: 3px;
+    border-left-color: var(--accent-blue);
+}
+
+.country-list-flag {
+    width: 32px;
+    height: 22px;
+    margin-right: var(--spacing-sm);
+    flex-shrink: 0;
+    border-radius: 2px;
+}
+
+.country-list-info {
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.country-list-name {
+    font-size: 13px;
+    color: var(--text-primary);
+    -unity-font-style: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.country-list-region {
+    font-size: 10px;
+    color: var(--text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.country-list-tier {
+    margin-left: var(--spacing-sm);
+    flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CENTER (TRANSPARENT MAP AREA)
+   ══════════════════════════════════════════════════════════════ */
+
+.center-area {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RIGHT INFO PANEL
+   ══════════════════════════════════════════════════════════════ */
+
+.info-panel {
+    width: 350px;
+    min-width: 350px;
+    flex-shrink: 0;
+    border-radius: 0;
+    border-left-width: 1px;
+    border-left-color: var(--border-subtle);
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-right-width: 0;
+    overflow: hidden;
+}

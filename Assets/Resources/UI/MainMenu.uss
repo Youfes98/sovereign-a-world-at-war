@@ -1,0 +1,17 @@
+/* MainMenu.uss - Hover effects only (all base styles are inline in UXML) */
+
+.menu-btn:hover {
+    background-color: #1A2A44;
+    border-color: #4A9EEB;
+    scale: 1.02;
+}
+
+.menu-btn-gold:hover {
+    background-color: #E0B854;
+    scale: 1.02;
+}
+
+.menu-btn-danger:hover {
+    background-color: rgba(192, 57, 43, 0.2);
+    scale: 1.02;
+}

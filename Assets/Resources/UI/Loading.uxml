@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+        xmlns:uie="UnityEditor.UIElements"
+        xsi="http://www.w3.org/2001/XMLSchema-instance"
+        engine="UnityEngine.UIElements"
+        editor="UnityEditor.UIElements">
+
+    <ui:VisualElement name="loading-root" class="main-menu-overlay">
+        <ui:VisualElement style="align-items: center; justify-content: center;">
+            <ui:Label text="LOADING..." class="title-lg" />
+            <ui:Label text="Preparing world data" class="label-sm"
+                      style="color: rgb(136, 153, 170); margin-top: 12px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+</ui:UXML>
