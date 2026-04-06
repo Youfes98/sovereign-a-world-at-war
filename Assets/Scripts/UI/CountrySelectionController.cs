@@ -253,20 +253,7 @@ namespace WarStrategy.UI
                     bordersLabel.text = "Landlocked nation";
                 else
                 {
-                    // Get border country names
-                    var borderNames = new System.Collections.Generic.List<string>();
-                    if (Services.GameState != null)
-                    {
-                        foreach (var adj in Services.GameState.GetAdjacencies(c.Iso))
-                        {
-                            if (Services.GameState.Countries.TryGetValue(adj, out var neighbor))
-                                borderNames.Add(neighbor.Name);
-                            if (borderNames.Count >= 6) break; // limit display
-                        }
-                    }
-                    bordersLabel.text = borderNames.Count > 0
-                        ? string.Join(", ", borderNames)
-                        : "Island nation";
+                    bordersLabel.text = "Coastal nation";
                 }
             }
 

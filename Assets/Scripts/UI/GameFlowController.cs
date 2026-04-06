@@ -428,7 +428,7 @@ namespace WarStrategy.UI
                 {
                     iconEl.style.backgroundImage = new StyleBackground(tex);
                     // Ensure the icon scales properly within the element
-                    iconEl.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
+                    iconEl.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
                     Debug.Log($"[GameFlow] Loaded icon: {iconName} ({tex.width}x{tex.height})");
                 }
                 else
