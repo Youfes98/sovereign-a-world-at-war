@@ -391,7 +391,7 @@ namespace WarStrategy.UI
             if (_gameplayHudPanel == null || Services.GameState == null) return;
             if (!Services.GameState.Countries.TryGetValue(iso, out var country)) return;
 
-            // Player flag (circular)
+            // Player flag
             var flagEl = _gameplayHudPanel.Q("player-flag");
             if (flagEl != null)
             {
@@ -408,6 +408,87 @@ namespace WarStrategy.UI
             var dateLabel = _gameplayHudPanel.Q<Label>("game-date");
             if (dateLabel != null && Services.Clock != null)
                 dateLabel.text = Services.Clock.GetDateString();
+
+            // Load resource icons via C# (USS resource() is unreliable)
+            string[] iconNames = { "icon_treasury", "icon_manpower", "icon_energy", "icon_military", "icon_stability" };
+            foreach (var iconName in iconNames)
+            {
+                var iconEl = _gameplayHudPanel.Q(iconName);
+                if (iconEl != null)
+                {
+                    var tex = Resources.Load<Texture2D>($"UI/Icons/{iconName}");
+                    if (tex != null)
+                        iconEl.style.backgroundImage = new StyleBackground(tex);
+                }
+            }
+
+            // Populate resource values
+            var gdpLabel = _gameplayHudPanel.Q<Label>("gdp-value");
+            if (gdpLabel != null) gdpLabel.text = FormatCurrency(country.GdpRawBillions);
+
+            var manpowerLabel = _gameplayHudPanel.Q<Label>("manpower-value");
+            if (manpowerLabel != null) manpowerLabel.text = FormatPopulation(country.Population / 10);
+
+            var balanceLabel = _gameplayHudPanel.Q<Label>("balance-value");
+            if (balanceLabel != null)
+            {
+                float bal = country.MonthlyBalance;
+                balanceLabel.text = (bal >= 0 ? "+" : "") + FormatCurrency(bal);
+                balanceLabel.style.color = bal >= 0
+                    ? new Color(0.30f, 0.69f, 0.31f)
+                    : new Color(0.75f, 0.22f, 0.17f);
+            }
+
+            var milLabel = _gameplayHudPanel.Q<Label>("military-value");
+            if (milLabel != null) milLabel.text = country.MilitaryNormalized.ToString();
+
+            var stabLabel = _gameplayHudPanel.Q<Label>("stability-value");
+            if (stabLabel != null) stabLabel.text = country.Stability.ToString();
+
+            // Speed controls
+            var pauseBtn = _gameplayHudPanel.Q<Button>("pause-btn");
+            var speedUpBtn = _gameplayHudPanel.Q<Button>("speed-up-btn");
+            var speedDownBtn = _gameplayHudPanel.Q<Button>("speed-down-btn");
+            var speedLabel = _gameplayHudPanel.Q<Label>("speed-label");
+
+            if (pauseBtn != null) pauseBtn.clicked += () =>
+            {
+                if (Services.Clock != null) Services.Clock.TogglePause();
+                if (speedLabel != null)
+                {
+                    if (Services.Clock.Paused) { speedLabel.text = "II"; speedLabel.style.color = new Color(0.75f, 0.22f, 0.17f); }
+                    else { speedLabel.text = $"{Services.Clock.Speed}x"; speedLabel.style.color = new Color(0.84f, 0.70f, 0.42f); }
+                }
+            };
+
+            if (speedUpBtn != null) speedUpBtn.clicked += () =>
+            {
+                if (Services.Clock != null) Services.Clock.SetSpeed(Mathf.Min(Services.Clock.Speed + 1, 5));
+                if (speedLabel != null) { speedLabel.text = $"{Services.Clock.Speed}x"; speedLabel.style.color = new Color(0.84f, 0.70f, 0.42f); }
+            };
+
+            if (speedDownBtn != null) speedDownBtn.clicked += () =>
+            {
+                if (Services.Clock != null) Services.Clock.SetSpeed(Mathf.Max(Services.Clock.Speed - 1, 1));
+                if (speedLabel != null) { speedLabel.text = $"{Services.Clock.Speed}x"; speedLabel.style.color = new Color(0.84f, 0.70f, 0.42f); }
+            };
+        }
+
+        private static string FormatCurrency(float billions)
+        {
+            if (billions >= 1000f) return $"${billions / 1000f:F1}T";
+            if (billions >= 1f) return $"${billions:F1}B";
+            if (billions >= 0.001f) return $"${billions * 1000f:F0}M";
+            if (billions <= -1f) return $"-${-billions:F1}B";
+            return "$0";
+        }
+
+        private static string FormatPopulation(long pop)
+        {
+            if (pop >= 1_000_000_000) return $"{pop / 1_000_000_000f:F1}B";
+            if (pop >= 1_000_000) return $"{pop / 1_000_000f:F1}M";
+            if (pop >= 1_000) return $"{pop / 1_000f:F0}K";
+            return pop.ToString();
         }
 
         // ────────────────────────────────────────────
