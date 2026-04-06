@@ -23,17 +23,17 @@ Shader "WarStrategy/MapShader"
         [Toggle] _HasDetail ("Has Detail", Float) = 0
         [Toggle] _HasTerrainTypes ("Has Terrain Types", Float) = 0
 
-        _CountryColorStr ("Country Color Strength", Range(0,1)) = 0.55
-        _TerrainDesat ("Terrain Desat", Range(0,1)) = 0.10
-        _ElevationStrength ("Elevation Relief", Float) = 12.0
+        _CountryColorStr ("Country Color Strength", Range(0,1)) = 0.70
+        _TerrainDesat ("Terrain Desat", Range(0,1)) = 0.03
+        _ElevationStrength ("Elevation Relief", Float) = 8.0
         _NoiseStr ("Noise Strength", Float) = 0.012
         _DetailStrength ("Detail Strength", Float) = 0.12
         _BiomeDetailStrength ("Biome Detail", Float) = 0.30
         _CoastGlowStr ("Coast Glow", Float) = 0.22
 
-        _OceanDeep ("Ocean Deep", Color) = (0.08, 0.16, 0.28, 1)
-        _OceanMid ("Ocean Mid", Color) = (0.14, 0.28, 0.40, 1)
-        _OceanShallow ("Ocean Shallow", Color) = (0.28, 0.40, 0.46, 1)
+        _OceanDeep ("Ocean Deep", Color) = (0.06, 0.18, 0.35, 1)
+        _OceanMid ("Ocean Mid", Color) = (0.12, 0.32, 0.46, 1)
+        _OceanShallow ("Ocean Shallow", Color) = (0.18, 0.52, 0.58, 1)
         _PaperTint ("Paper Tint", Color) = (1.0, 0.96, 0.88, 1)
         _PaperStrength ("Paper Strength", Float) = 0.18
 
@@ -202,19 +202,19 @@ Shader "WarStrategy/MapShader"
                 float3 highs   = float3(1.00, 0.96, 0.88);
                 float3 palette = lerp(shadows, mid, smoothstep(0.2, 0.6, lum));
                 palette = lerp(palette, highs, smoothstep(0.6, 1.0, lum));
-                return lerp(col, col * palette, 0.30); // light touch — preserve terrain richness
+                return lerp(col, col * palette, 0.15); // minimal — preserve biome vibrancy
             }
 
             // Procedural biome coloring from terrain_types + heightmap
             float3 BiomeColor(float terrainTypeRaw, float height, float2 uv)
             {
-                // Curated palette per biome — rich, saturated, painterly
-                float3 desert_lo  = float3(0.88, 0.72, 0.40); float3 desert_hi  = float3(0.80, 0.60, 0.32);
-                float3 plains_lo  = float3(0.72, 0.72, 0.40); float3 plains_hi  = float3(0.62, 0.58, 0.35);
-                float3 forest_lo  = float3(0.25, 0.52, 0.22); float3 forest_hi  = float3(0.18, 0.42, 0.15);
-                float3 mount_lo   = float3(0.60, 0.52, 0.38); float3 mount_hi   = float3(0.50, 0.45, 0.35);
-                float3 tundra_lo  = float3(0.72, 0.74, 0.72); float3 tundra_hi  = float3(0.65, 0.67, 0.66);
-                float3 jungle_lo  = float3(0.18, 0.55, 0.18); float3 jungle_hi  = float3(0.14, 0.46, 0.12);
+                // Curated palette — bright, vivid, painterly (hi = LIGHTER at altitude)
+                float3 desert_lo  = float3(0.80, 0.62, 0.34); float3 desert_hi  = float3(0.92, 0.78, 0.48);
+                float3 plains_lo  = float3(0.58, 0.62, 0.32); float3 plains_hi  = float3(0.78, 0.78, 0.48);
+                float3 forest_lo  = float3(0.18, 0.45, 0.15); float3 forest_hi  = float3(0.35, 0.60, 0.30);
+                float3 mount_lo   = float3(0.50, 0.45, 0.35); float3 mount_hi   = float3(0.68, 0.62, 0.50);
+                float3 tundra_lo  = float3(0.78, 0.80, 0.84); float3 tundra_hi  = float3(0.90, 0.92, 0.94);
+                float3 jungle_lo  = float3(0.12, 0.42, 0.12); float3 jungle_hi  = float3(0.25, 0.60, 0.25);
 
                 int biome = clamp((int)(terrainTypeRaw * 255.0 + 0.5), 0, 5);
                 float h = saturate(height);
@@ -361,6 +361,10 @@ Shader "WarStrategy/MapShader"
                     float3 deepCol = float3(0.04, 0.14, 0.28);
                     col = lerp(shallowCol, deepCol, waterDepth);
 
+                    // Large-scale ocean patterns visible at world zoom
+                    float oceanPat = smoothNoise(uv * 3.0 + t * 0.1) * 0.5 + smoothNoise(uv * 6.0 - t * 0.05) * 0.5;
+                    col = lerp(col, col * 1.12, (oceanPat - 0.4) * 0.25);
+
                     // Seafloor visible in shallows
                     if (_HasTerrain > 0.5)
                     {
@@ -399,10 +403,10 @@ Shader "WarStrategy/MapShader"
                         // Fallback: procedural waves
                         float w1 = smoothNoise(uv * 30.0 + float2(t, t * 0.7));
                         float w2 = smoothNoise(uv * 55.0 + float2(-t * 0.6, t * 0.4));
-                        col += (w1 * 0.6 + w2 * 0.4 - 0.5) * lerp(0.010, 0.020, 1.0 - waterDepth);
+                        col += (w1 * 0.6 + w2 * 0.4 - 0.5) * lerp(0.04, 0.08, 1.0 - waterDepth);
                         // Procedural specular
                         float specN = smoothNoise(uv * 80.0 + float2(t * 0.5, t * 0.3));
-                        col += pow(saturate(specN * 1.2 - 0.1), 6.0) * 0.06;
+                        col += pow(saturate(specN * 1.2 - 0.1), 4.0) * 0.18;
                     }
 
                     // Coast detection
@@ -450,11 +454,11 @@ Shader "WarStrategy/MapShader"
                         float3 biomeCol = BiomeColor(tt, height, terrainUV);
                         // Boost terrain saturation before blending
                         float tLum = Lum(terrain);
-                        float3 terrSat = lerp(float3(tLum,tLum,tLum), terrain, 1.8);
-                        // Extra warmth push for sandy/desert terrain (where R > G > B)
-                        float warmness = saturate((terrSat.r - terrSat.b) * 2.0);
-                        terrSat *= lerp(float3(1,1,1), float3(1.08, 1.0, 0.88), warmness);
-                        biomeBase = terrSat * 0.6 + biomeCol * 0.4;
+                        // Strip satellite color, keep only luminance detail
+                        float3 terrLumOnly = float3(tLum, tLum, tLum);
+                        float3 terrSubtle = lerp(terrLumOnly, terrain, 0.3); // 30% color, 70% luminance
+                        // Biome color dominates — painterly, not photographic
+                        biomeBase = biomeCol * 0.75 + terrSubtle * 0.25;
                     }
                     else if (_HasTerrainTypes > 0.5)
                     {
@@ -465,12 +469,17 @@ Shader "WarStrategy/MapShader"
                     float desatAmount = _TerrainDesat * zoomFade;
                     float3 terrBase = Desat(biomeBase, desatAmount);
 
-                    // Step 2: Tint terrain with country color (fades with zoom)
-                    float3 tinted = terrBase * lerp(float3(1,1,1), countryCol * 1.8, colorStr);
+                    // Step 2: Overlay blend — terrain luminance + country hue (V3 style)
+                    float3 cBoost = countryCol * 1.5;
+                    float3 overlaid = lerp(
+                        2.0 * terrBase * cBoost,
+                        1.0 - 2.0 * (1.0 - terrBase) * (1.0 - cBoost),
+                        step(0.5, terrBase));
+                    float3 tinted = lerp(terrBase, overlaid, colorStr);
 
-                    // Boost saturation in flat areas
+                    // Flat area fill boost
                     float flatness = 1.0 - saturate(abs(relief) * 3.0);
-                    tinted = lerp(tinted, countryCol * (terrLum * 0.6 + 0.5), colorStr * 0.45 * flatness);
+                    tinted = lerp(tinted, lerp(terrBase, countryCol, 0.6) * (terrLum * 0.5 + 0.6), colorStr * 0.35 * flatness);
 
                     col = tinted;
 
@@ -546,33 +555,35 @@ Shader "WarStrategy/MapShader"
                     {
                         // Reconstruct normal from heightmap gradient (dx/dy computed earlier)
                         float3 normal = normalize(float3(-dx * _ElevationStrength, -dy * _ElevationStrength, 1.0));
-                        float3 sunDir = normalize(float3(-1.5, 0.8, 2.0)); // very oblique NW sun — long ridge shadows
+                        float3 sunDir = normalize(float3(-1.5, 0.8, 2.0));
                         float diffuse = max(dot(normal, sunDir), 0.0);
-                        float lighting = 0.55 + 0.45 * diffuse; // deeper shadows, brighter peaks
-                        // Valley AO
+
+                        // Height-masked relief: plains stay flat, mountains get dramatic shading
+                        float reliefMask = smoothstep(0.12, 0.40, height);
+                        float lighting = lerp(0.92, 0.50 + 0.50 * diffuse, reliefMask);
+
                         float grad = sqrt(dx*dx + dy*dy);
                         float ao = saturate(1.0 - grad * _ElevationStrength * 0.8);
-                        lighting *= lerp(0.85, 1.0, ao);
-                        col *= clamp(lighting, 0.50, 1.40); // dramatic range for 3D depth
+                        lighting *= lerp(0.88, 1.0, ao);
+                        col *= clamp(lighting, 0.42, 1.50);
                         // Apply self-shadowing (mountains cast shadows on valleys)
                         col *= selfShadow;
                         // Elevation color shift: warm lowlands, slightly cool highlands
                         float3 lowTint  = float3(1.02, 0.98, 0.92); // warm boost
                         float3 highTint = float3(0.92, 0.92, 0.94); // barely cool
                         col *= lerp(lowTint, highTint, saturate(height * 0.4));
-                        // Snow on mountain peaks
+                        // Snow: mountain peaks + polar latitude
                         float snowMask = smoothstep(_SnowHeight, _SnowHeight + 0.12, height);
+                        float latitude = abs(uv.y - 0.5) * 2.0;
+                        float polarSnow = smoothstep(0.78, 0.92, latitude);
+                        snowMask = max(snowMask, polarSnow * 0.85);
                         // Snow is brighter on sun-facing slopes
                         float snowLight = 0.85 + 0.15 * diffuse;
                         float3 snowColor = float3(0.92, 0.93, 0.95) * snowLight;
                         col = lerp(col, snowColor, snowMask * _SnowStr);
 
-                        // Rivers: detect valley channels from heightmap gradient
-                        float valleyDepth = saturate(0.3 - height) * 3.0;
-                        float riverWidth = saturate(grad * _ElevationStrength - 0.15) * valleyDepth;
-                        riverWidth *= smoothstep(0.0, 0.02, riverWidth); // sharpen edges
-                        float3 riverColor = float3(0.15, 0.28, 0.40);
-                        col = lerp(col, riverColor, saturate(riverWidth * 0.6));
+                        // Rivers removed — heightmap gradient detection was unreliable
+                        // TODO: Add dedicated river mask texture for accurate rivers
                     }
 
                     // Step 5: Unified noise system (smooth, zoom-aware)
@@ -628,7 +639,7 @@ Shader "WarStrategy/MapShader"
                     // ── Micro color variation + palette mapping + global harmony ──
                     col *= 0.98 + 0.04 * smoothNoise(uv * 2.0);
                     col = PaletteMap(col);
-                    col = lerp(col, col * float3(1.0, 0.97, 0.93), 0.6);
+                    col = lerp(col, col * float3(1.02, 0.99, 0.96), 0.25); // subtle warm, not mud
 
                     // ── Step 9: GPU Border Detection (integer comparison, 8-neighbor AA) ──
                     // If center pixel itself is an interpolated artifact (owner=0, idx>0),
