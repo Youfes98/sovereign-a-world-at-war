@@ -349,10 +349,11 @@ Shader "WarStrategy/MapShader"
                     float depthT = saturate(depth * 1.5);
                     col = lerp(shallowCol, lerp(midCol, deepCol, saturate((depthT - 0.4) / 0.6)), depthT);
 
-                    // Visible seafloor: blend terrain through water based on depth
+                    // Visible seafloor: use ORIGINAL uv (not parallax-shifted) to prevent movement on zoom
                     if (_HasTerrain > 0.5)
                     {
-                        float3 seafloor = terrain * float3(0.55, 0.72, 0.70);
+                        float3 oceanTerrain = SAMPLE_TEXTURE2D(_TerrainTex, sampler_TerrainTex, uv).rgb;
+                        float3 seafloor = oceanTerrain * float3(0.55, 0.72, 0.70);
                         float seafloorVis = (1.0 - smoothstep(0.0, 0.45, depthT)) * 0.55;
                         // Stronger seafloor at close zoom
                         seafloorVis *= lerp(1.0, 1.4, saturate((_ZoomLevel - 3.0) / 6.0));
