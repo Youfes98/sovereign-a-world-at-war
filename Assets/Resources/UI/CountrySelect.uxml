@@ -60,6 +60,7 @@
                                border-radius: 4px;
                                border-width: 2px; border-color: rgba(255,255,255,0.15);
                                margin-right: 16px;
+                               background-color: rgba(0,0,0,0.3);
                                -unity-background-scale-mode: scale-and-crop;" />
 
                     <ui:VisualElement style="flex-grow: 1; flex-direction: column; justify-content: center;">
@@ -104,6 +105,7 @@
 
             <!-- Stats Section -->
             <ui:VisualElement style="padding: 16px 24px; flex-direction: column;
+                                     border-top-width: 1px; border-top-color: rgba(212, 168, 67, 0.1);
                                      border-bottom-width: 1px; border-bottom-color: rgba(255,255,255,0.06);">
 
                 <!-- GDP -->
@@ -230,12 +232,13 @@
             </ui:VisualElement>
 
             <!-- Play Button (bottom-pinned) -->
+            <!-- TODO: Add USS hover effect: background-color rgba(212,168,67,0.25), border-color rgba(212,168,67,0.6) -->
             <ui:VisualElement style="padding: 12px 24px 20px 24px;">
                 <ui:Button name="play-btn" text=""
-                    style="height: 48px;
+                    style="height: 52px;
                            background-color: rgba(212, 168, 67, 0.15);
                            color: #D4A843;
-                           -unity-font-style: bold; font-size: 15px;
+                           -unity-font-style: bold; font-size: 16px;
                            border-width: 1px; border-color: rgba(212, 168, 67, 0.4);
                            border-radius: 4px;
                            -unity-text-align: middle-center;

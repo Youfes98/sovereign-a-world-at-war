@@ -124,5 +124,99 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <!-- LEFT SIDE NAVIGATION PANEL -->
+        <ui:VisualElement name="left-nav-panel"
+            picking-mode="Position"
+            style="position: absolute; left: 0; top: 80px;
+                   width: 56px;
+                   background-color: rgba(10, 16, 26, 0.92);
+                   border-right-width: 1px; border-right-color: rgba(255,255,255,0.06);
+                   border-bottom-right-radius: 8px;
+                   padding: 6px; flex-direction: column;">
+
+            <ui:Button name="btn-diplomacy" text="DPL"
+                style="width: 44px; height: 44px;
+                       background-color: rgba(255,255,255,0.03);
+                       border-width: 1px; border-color: rgba(255,255,255,0.05);
+                       border-radius: 6px;
+                       font-size: 9px; color: #778899; -unity-font-style: bold;
+                       letter-spacing: 1px; -unity-text-align: middle-center;
+                       margin-bottom: 4px;" />
+
+            <ui:Button name="btn-research" text="RES"
+                style="width: 44px; height: 44px;
+                       background-color: rgba(255,255,255,0.03);
+                       border-width: 1px; border-color: rgba(255,255,255,0.05);
+                       border-radius: 6px;
+                       font-size: 9px; color: #778899; -unity-font-style: bold;
+                       letter-spacing: 1px; -unity-text-align: middle-center;
+                       margin-bottom: 4px;" />
+
+            <ui:Button name="btn-production" text="PRD"
+                style="width: 44px; height: 44px;
+                       background-color: rgba(255,255,255,0.03);
+                       border-width: 1px; border-color: rgba(255,255,255,0.05);
+                       border-radius: 6px;
+                       font-size: 9px; color: #778899; -unity-font-style: bold;
+                       letter-spacing: 1px; -unity-text-align: middle-center;
+                       margin-bottom: 4px;" />
+
+            <ui:Button name="btn-espionage" text="INT"
+                style="width: 44px; height: 44px;
+                       background-color: rgba(255,255,255,0.03);
+                       border-width: 1px; border-color: rgba(255,255,255,0.05);
+                       border-radius: 6px;
+                       font-size: 9px; color: #778899; -unity-font-style: bold;
+                       letter-spacing: 1px; -unity-text-align: middle-center;" />
+        </ui:VisualElement>
+
+        <!-- BOTTOM TAB BAR -->
+        <ui:VisualElement name="bottom-tab-bar"
+            picking-mode="Position"
+            style="position: absolute; bottom: 0; left: 50%;
+                   translate: -50% 0;
+                   background-color: rgba(10, 16, 26, 0.92);
+                   border-top-left-radius: 6px; border-top-right-radius: 6px;
+                   border-top-width: 1px; border-top-color: rgba(255,255,255,0.06);
+                   padding: 6px 8px;
+                   flex-direction: row; align-items: center;">
+
+            <!-- Economy (active) -->
+            <ui:Button name="tab-economy" text="Economy"
+                style="padding: 8px 24px;
+                       background-color: rgba(212,168,67,0.12);
+                       border-width: 1px; border-color: rgba(212,168,67,0.25);
+                       border-radius: 4px;
+                       color: #D4A843; font-size: 12px; -unity-font-style: bold;
+                       -unity-text-align: middle-center;
+                       margin-right: 4px;" />
+
+            <ui:Button name="tab-military" text="Military"
+                style="padding: 8px 24px;
+                       background-color: rgba(0,0,0,0);
+                       border-width: 1px; border-color: rgba(255,255,255,0.04);
+                       border-radius: 4px;
+                       color: #667788; font-size: 12px;
+                       -unity-text-align: middle-center;
+                       margin-right: 4px;" />
+
+            <ui:Button name="tab-technology" text="Technology"
+                style="padding: 8px 24px;
+                       background-color: rgba(0,0,0,0);
+                       border-width: 1px; border-color: rgba(255,255,255,0.04);
+                       border-radius: 4px;
+                       color: #667788; font-size: 12px;
+                       -unity-text-align: middle-center;
+                       margin-right: 4px;" />
+
+            <ui:Button name="tab-diplomacy" text="Diplomacy"
+                style="padding: 8px 24px;
+                       background-color: rgba(0,0,0,0);
+                       border-width: 1px; border-color: rgba(255,255,255,0.04);
+                       border-radius: 4px;
+                       color: #667788; font-size: 12px;
+                       -unity-text-align: middle-center;" />
+        </ui:VisualElement>
+
     </ui:VisualElement>
 </ui:UXML>
