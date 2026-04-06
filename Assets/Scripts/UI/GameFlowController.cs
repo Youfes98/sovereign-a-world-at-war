@@ -437,6 +437,20 @@ namespace WarStrategy.UI
                 }
             }
 
+            // Load nav icons
+            string[] navIcons = { "icon_diplomacy", "icon_research", "icon_production", "icon_espionage" };
+            foreach (var navIcon in navIcons)
+            {
+                string elName = "nav-" + navIcon.Replace('_', '-');
+                var navEl = _gameplayHudPanel.Q(elName);
+                if (navEl != null)
+                {
+                    var navTex = Resources.Load<Texture2D>($"UI/Icons/{navIcon}");
+                    if (navTex != null)
+                        navEl.style.backgroundImage = new StyleBackground(navTex);
+                }
+            }
+
             // Populate resource values
             var gdpLabel = _gameplayHudPanel.Q<Label>("gdp-value");
             if (gdpLabel != null) gdpLabel.text = FormatCurrency(country.GdpRawBillions);
