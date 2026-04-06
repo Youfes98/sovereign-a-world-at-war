@@ -17,6 +17,25 @@ namespace WarStrategy.UI
             _onLoadGame = onLoadGame;
             _onExit = onExit;
 
+            // Load background art
+            var bgEl = root.Q("menu-bg");
+            if (bgEl != null)
+            {
+                var bgTex = Resources.Load<Texture2D>("UI/Art/main_menu_bg");
+                if (bgTex != null)
+                    bgEl.style.backgroundImage = new StyleBackground(bgTex);
+            }
+
+            // Load game logo
+            var logoEl = root.Q("menu-logo");
+            if (logoEl != null)
+            {
+                var logoTex = Resources.Load<Texture2D>("UI/Art/game_logo");
+                if (logoTex != null)
+                    logoEl.style.backgroundImage = new StyleBackground(logoTex);
+            }
+
+            // Button handlers
             var newGameBtn = root.Q<Button>("new-game-btn");
             if (newGameBtn != null) newGameBtn.clicked += () => _onNewGame?.Invoke();
 

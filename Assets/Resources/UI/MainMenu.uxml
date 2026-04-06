@@ -1,96 +1,104 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements"
-        xmlns:uie="UnityEditor.UIElements"
-        xsi="http://www.w3.org/2001/XMLSchema-instance"
-        engine="UnityEngine.UIElements"
-        editor="UnityEditor.UIElements">
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
 
-    <!-- Fullscreen dark overlay -->
+    <!-- Fullscreen main menu with background art -->
     <ui:VisualElement name="main-menu-root"
         style="position: absolute; left: 0; top: 0; right: 0; bottom: 0;
-               background-color: rgba(11, 20, 38, 0.88);
-               align-items: center; justify-content: center; flex-grow: 1;">
+               background-color: #000000;">
 
-        <!-- Centered menu card -->
-        <ui:VisualElement name="menu-card"
-            style="width: 320px;
-                   background-color: #111D33;
-                   border-width: 1px; border-color: #1E3050;
-                   border-radius: 8px;
-                   padding-top: 40px; padding-bottom: 40px;
-                   padding-left: 32px; padding-right: 32px;
-                   align-items: stretch;">
+        <!-- Background art (loaded via C#) -->
+        <ui:VisualElement name="menu-bg"
+            style="position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+                   -unity-background-scale-mode: scale-and-crop;" />
 
-            <!-- Title -->
-            <ui:Label text="WAR STRATEGY"
-                style="font-size: 32px; color: #D4A843;
-                       -unity-font-style: bold;
-                       letter-spacing: 3px;
-                       -unity-text-align: middle-center;
-                       margin-bottom: 4px;" />
+        <!-- Dark gradient overlay for readability -->
+        <ui:VisualElement
+            style="position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+                   background-color: rgba(0, 0, 0, 0.35);" />
 
-            <!-- Subtitle -->
-            <ui:Label text="A World at Stake"
-                style="font-size: 12px; color: #8899AA;
-                       -unity-font-style: italic;
-                       -unity-text-align: middle-center;
-                       margin-bottom: 32px;" />
+        <!-- Left-side content panel -->
+        <ui:VisualElement name="menu-content"
+            style="position: absolute; left: 0; top: 0; bottom: 0; width: 460px;
+                   background-color: rgba(8, 14, 24, 0.85);
+                   border-right-width: 1px; border-right-color: rgba(212, 168, 67, 0.15);
+                   flex-direction: column; justify-content: center;
+                   padding-left: 48px; padding-right: 48px;">
 
-            <!-- NEW GAME (gold primary button) -->
-            <ui:Button name="new-game-btn" text="NEW GAME" class="menu-btn-gold"
-                style="height: 44px;
-                       background-color: #D4A843; color: #0B1426;
-                       -unity-font-style: bold; font-size: 15px;
-                       border-width: 0; border-radius: 4px;
-                       margin-bottom: 10px;
-                       -unity-text-align: middle-center;
-                       transition-property: scale, background-color, border-color;
-                       transition-duration: 0.12s;
-                       transition-timing-function: ease-out;" />
+            <!-- Game Logo (loaded via C#) -->
+            <ui:VisualElement name="menu-logo"
+                style="width: 360px; height: 160px;
+                       margin-bottom: 40px;
+                       -unity-background-scale-mode: scale-to-fit;" />
 
-            <!-- LOAD GAME -->
-            <ui:Button name="load-game-btn" text="LOAD GAME" class="menu-btn"
-                style="height: 40px;
-                       background-color: rgba(0, 0, 0, 0);
-                       color: #E8E8E8; font-size: 14px;
-                       border-width: 1px; border-color: #1E3050;
-                       border-radius: 4px;
-                       margin-bottom: 10px;
-                       -unity-text-align: middle-center;
-                       transition-property: scale, background-color, border-color;
-                       transition-duration: 0.12s;
-                       transition-timing-function: ease-out;" />
+            <!-- Menu Buttons -->
+            <ui:VisualElement style="width: 280px;">
 
-            <!-- SETTINGS -->
-            <ui:Button name="settings-btn" text="SETTINGS" class="menu-btn"
-                style="height: 40px;
-                       background-color: rgba(0, 0, 0, 0);
-                       color: #E8E8E8; font-size: 14px;
-                       border-width: 1px; border-color: #1E3050;
-                       border-radius: 4px;
-                       margin-bottom: 10px;
-                       -unity-text-align: middle-center;
-                       transition-property: scale, background-color, border-color;
-                       transition-duration: 0.12s;
-                       transition-timing-function: ease-out;" />
+                <!-- NEW GAME -->
+                <ui:Button name="new-game-btn" text="New Game"
+                    style="height: 48px;
+                           background-color: rgba(212, 168, 67, 0.12);
+                           color: #D4A843; font-size: 18px;
+                           -unity-font-style: bold;
+                           border-width: 1px; border-color: rgba(212, 168, 67, 0.4);
+                           border-radius: 4px;
+                           margin-bottom: 8px;
+                           -unity-text-align: middle-center;
+                           letter-spacing: 2px;
+                           transition-property: background-color, border-color;
+                           transition-duration: 0.15s;" />
 
-            <!-- EXIT (danger outline) -->
-            <ui:Button name="exit-btn" text="EXIT" class="menu-btn-danger"
-                style="height: 40px;
-                       background-color: rgba(0, 0, 0, 0);
-                       color: #C0392B; font-size: 14px;
-                       border-width: 1px; border-color: #C0392B;
-                       border-radius: 4px;
-                       -unity-text-align: middle-center;
-                       transition-property: scale, background-color, border-color;
-                       transition-duration: 0.12s;
-                       transition-timing-function: ease-out;" />
+                <!-- LOAD GAME -->
+                <ui:Button name="load-game-btn" text="Load Game"
+                    style="height: 44px;
+                           background-color: rgba(255, 255, 255, 0.03);
+                           color: #CCCCCC; font-size: 16px;
+                           border-width: 1px; border-color: rgba(255, 255, 255, 0.08);
+                           border-radius: 4px;
+                           margin-bottom: 8px;
+                           -unity-text-align: middle-center;
+                           letter-spacing: 1px;
+                           transition-property: background-color, border-color;
+                           transition-duration: 0.15s;" />
 
+                <!-- SETTINGS -->
+                <ui:Button name="settings-btn" text="Settings"
+                    style="height: 44px;
+                           background-color: rgba(255, 255, 255, 0.03);
+                           color: #CCCCCC; font-size: 16px;
+                           border-width: 1px; border-color: rgba(255, 255, 255, 0.08);
+                           border-radius: 4px;
+                           margin-bottom: 8px;
+                           -unity-text-align: middle-center;
+                           letter-spacing: 1px;
+                           transition-property: background-color, border-color;
+                           transition-duration: 0.15s;" />
+
+                <!-- EXIT -->
+                <ui:Button name="exit-btn" text="Exit to Desktop"
+                    style="height: 44px;
+                           background-color: rgba(0, 0, 0, 0);
+                           color: #667788; font-size: 14px;
+                           border-width: 0;
+                           border-radius: 4px;
+                           margin-top: 12px;
+                           -unity-text-align: middle-center;
+                           transition-property: color;
+                           transition-duration: 0.15s;" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- Version label pinned bottom-right -->
-        <ui:Label text="v0.1.0 Alpha"
-            style="position: absolute; right: 16px; bottom: 12px;
-                   font-size: 10px; color: #556677;" />
+        <!-- Bottom bar: version + links -->
+        <ui:VisualElement
+            style="position: absolute; left: 0; right: 0; bottom: 0; height: 36px;
+                   flex-direction: row; align-items: center; justify-content: space-between;
+                   padding-left: 20px; padding-right: 20px;
+                   background-color: rgba(0, 0, 0, 0.5);">
+
+            <ui:Label text="v0.1.0 Alpha"
+                style="font-size: 11px; color: #556677;" />
+
+            <ui:Label text="© 2026 — Grand Strategy"
+                style="font-size: 11px; color: #556677;" />
+        </ui:VisualElement>
 
     </ui:VisualElement>
 </ui:UXML>
