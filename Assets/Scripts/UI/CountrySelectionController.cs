@@ -76,7 +76,7 @@ namespace WarStrategy.UI
             if (_card != null)
             {
                 _card.style.display = DisplayStyle.None;
-                _card.style.translate = new Translate(320, 0);
+                _card.style.translate = new Translate(360, 0);
                 _card.style.opacity = 0f;
             }
         }
@@ -90,7 +90,7 @@ namespace WarStrategy.UI
             if (_card != null)
             {
                 // Reset card to hidden state
-                _card.style.translate = new Translate(320, 0);
+                _card.style.translate = new Translate(360, 0);
                 _card.style.opacity = 0f;
                 _card.style.display = DisplayStyle.None;
             }
@@ -150,7 +150,7 @@ namespace WarStrategy.UI
             if (_card == null) return;
 
             // Ensure card starts off-screen before making visible
-            _card.style.translate = new Translate(320, 0);
+            _card.style.translate = new Translate(360, 0);
             _card.style.opacity = 0f;
             _card.style.display = DisplayStyle.Flex;
 
@@ -237,6 +237,67 @@ namespace WarStrategy.UI
             // Play button
             if (_playBtn != null)
                 _playBtn.text = $"PLAY AS {c.Name.ToUpper()}";
+
+            // Additional info fields
+            SetLabel(_root.Q<Label>("capital-value"), c.Capital);
+            SetLabel(_root.Q<Label>("literacy-value"), $"{c.LiteracyRate}%");
+            SetLabel(_root.Q<Label>("infra-value"), $"{c.Infrastructure}/100");
+            SetLabel(_root.Q<Label>("credit-value"), $"{c.CreditRating}/100");
+            SetLabel(_root.Q<Label>("debt-value"), $"{c.DebtToGdp:F1}%");
+
+            // Borders list
+            var bordersLabel = _root.Q<Label>("borders-value");
+            if (bordersLabel != null)
+            {
+                if (c.Landlocked)
+                    bordersLabel.text = "Landlocked nation";
+                else
+                {
+                    // Get border country names
+                    var borderNames = new System.Collections.Generic.List<string>();
+                    if (Services.GameState != null)
+                    {
+                        foreach (var adj in Services.GameState.GetAdjacencies(c.Iso))
+                        {
+                            if (Services.GameState.Countries.TryGetValue(adj, out var neighbor))
+                                borderNames.Add(neighbor.Name);
+                            if (borderNames.Count >= 6) break; // limit display
+                        }
+                    }
+                    bordersLabel.text = borderNames.Count > 0
+                        ? string.Join(", ", borderNames)
+                        : "Island nation";
+                }
+            }
+
+            // Country summary (generated from data)
+            var summaryLabel = _root.Q<Label>("country-summary");
+            if (summaryLabel != null)
+            {
+                string sizeDesc = c.Population switch
+                {
+                    > 500_000_000 => "massive",
+                    > 100_000_000 => "major",
+                    > 50_000_000 => "large",
+                    > 10_000_000 => "mid-sized",
+                    > 1_000_000 => "small",
+                    _ => "micro"
+                };
+                string econDesc = c.GdpRawBillions switch
+                {
+                    > 5000 => "the world's largest economies",
+                    > 1000 => "a major global economy",
+                    > 100 => "a significant regional economy",
+                    > 10 => "a developing economy",
+                    _ => "a small economy"
+                };
+                string stabDesc = c.Stability > 70 ? "stable governance" :
+                                  c.Stability > 40 ? "moderate stability" : "political instability";
+
+                summaryLabel.text = $"{c.Name} is a {sizeDesc} {c.GovernmentType.ToLower()} " +
+                    $"in {c.Subregion} with {econDesc} and {stabDesc}. " +
+                    $"Its capital {c.Capital} serves as the center of political power.";
+            }
         }
 
         private static void SetLabel(Label label, string text)
