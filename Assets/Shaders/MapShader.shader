@@ -13,11 +13,11 @@ Shader "WarStrategy/MapShader"
         _DetailTex ("Detail", 2D) = "gray" {}
         _TerrainTypeTex ("Terrain Types", 2D) = "black" {}
         _BiomeAtlas ("Biome Atlas", 2D) = "gray" {}
-        _OceanDeepTex ("Ocean Deep Texture", 2D) = "gray" {}
-        _OceanShallowTex ("Ocean Shallow Texture", 2D) = "gray" {}
+        _WaveNormalTex ("Wave Normal Map", 2D) = "bump" {}
+        _WaveScale ("Wave Scale", Float) = 8.0
 
         [Toggle] _HasTerrain ("Has Terrain", Float) = 0
-        [Toggle] _HasOceanTex ("Has Ocean Textures", Float) = 0
+        [Toggle] _HasWaveNormal ("Has Wave Normal", Float) = 0
         [Toggle] _HasHeightmap ("Has Heightmap", Float) = 0
         [Toggle] _HasNoise ("Has Noise", Float) = 0
         [Toggle] _HasDetail ("Has Detail", Float) = 0
@@ -104,15 +104,15 @@ Shader "WarStrategy/MapShader"
             TEXTURE2D(_TerrainTypeTex); SAMPLER(sampler_TerrainTypeTex);
             TEXTURE2D(_BiomeAtlas);     SAMPLER(sampler_BiomeAtlas);
             TEXTURE2D(_OwnerLUT);       SAMPLER(sampler_OwnerLUT);
-            TEXTURE2D(_OceanDeepTex);   SAMPLER(sampler_OceanDeepTex);
-            TEXTURE2D(_OceanShallowTex); SAMPLER(sampler_OceanShallowTex);
+            TEXTURE2D(_WaveNormalTex);  SAMPLER(sampler_WaveNormalTex);
 
             CBUFFER_START(UnityPerMaterial)
                 float _LUTWidth;
                 float4 _ProvinceTex_TexelSize;
                 float4 _HeightmapTex_TexelSize;
 
-                float _HasTerrain, _HasHeightmap, _HasNoise, _HasDetail, _HasTerrainTypes, _HasOceanTex;
+                float _HasTerrain, _HasHeightmap, _HasNoise, _HasDetail, _HasTerrainTypes, _HasWaveNormal;
+                float _WaveScale;
                 float _CountryColorStr, _TerrainDesat, _ElevationStrength;
                 float _NoiseStr, _DetailStrength, _BiomeDetailStrength, _CoastGlowStr;
 
@@ -314,21 +314,29 @@ Shader "WarStrategy/MapShader"
                     dy = (hBL + 2.0*hB + hBR) - (hTL + 2.0*hT + hTR);
                     relief = (-dx + dy) * _ElevationStrength;
 
-                    // Self-shadowing: LAND ONLY, zoom-gated
+                    // Self-shadowing: LAND ONLY, zoom-gated, 12 steps for smooth shadows
                     float shadowFade = (idx > 0) ? saturate((_ZoomLevel - 2.0) / 3.0) : 0.0;
                     if (shadowFade > 0.01)
                     {
-                        float2 sunUV = normalize(float2(-0.5, 0.3)) * hpx * 2.5;
+                        float2 sunUV = normalize(float2(-1.5, 0.8)) * hpx * 2.0;
                         float currentH = height;
                         selfShadow = 1.0;
-                        [unroll] for (int si = 1; si <= 8; si++)
+                        [unroll] for (int si = 1; si <= 12; si++)
                         {
                             float sH = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex,
                                 terrainUV + sunUV * (float)si, 0).r;
-                            float hDiff = sH - currentH - 0.005 * (float)si;
-                            selfShadow = min(selfShadow, 1.0 - saturate(hDiff * 12.0));
+                            float horizon = currentH + 0.006 * (float)si;
+                            if (sH > horizon) { selfShadow = 0.45; break; }
                         }
-                        selfShadow = lerp(1.0, selfShadow, 0.55 * shadowFade);
+                        selfShadow = lerp(1.0, selfShadow, 0.65 * shadowFade);
+                    }
+
+                    // Curvature-based valley AO (concave = darker)
+                    if (_HasHeightmap > 0.5 && idx > 0)
+                    {
+                        float avgH = (hT + hB + hL + hR) * 0.25;
+                        float curveAO = saturate(1.0 - (avgH - height) * 10.0);
+                        selfShadow *= lerp(0.6, 1.0, curveAO);
                     }
                 }
 
@@ -342,48 +350,62 @@ Shader "WarStrategy/MapShader"
                 if (idx == 0)
                 {
                     // ════════════════════════════════════════
-                    // OCEAN — procedural water (no texture dependencies)
+                    // OCEAN — depth gradient + wave normals + specular
                     // ════════════════════════════════════════
 
-                    float depth = 1.0 - height;
-                    float depthT = saturate(depth * 1.5);
+                    float waterDepth = saturate((0.15 - height) * 6.0); // 0=coast, 1=deep
                     float t = _Time.y * 0.06;
 
-                    // Base color gradient: shallow teal → mid blue → deep navy
-                    col = lerp(_OceanShallow.rgb,
-                          lerp(_OceanMid.rgb, _OceanDeep.rgb, saturate((depthT - 0.4) / 0.6)),
-                          depthT);
+                    // Depth gradient: shallow teal → deep navy
+                    float3 shallowCol = float3(0.12, 0.45, 0.52);
+                    float3 deepCol = float3(0.04, 0.14, 0.28);
+                    col = lerp(shallowCol, deepCol, waterDepth);
 
-                    // Seafloor visible through shallow water (original UV — no parallax)
+                    // Seafloor visible in shallows
                     if (_HasTerrain > 0.5)
                     {
-                        float3 oceanTerrain = SAMPLE_TEXTURE2D(_TerrainTex, sampler_TerrainTex, uv).rgb;
-                        float3 seafloor = oceanTerrain * float3(0.55, 0.70, 0.68);
-                        float vis = (1.0 - smoothstep(0.0, 0.40, depthT)) * 0.45;
-                        col = lerp(col, seafloor, vis);
+                        float3 seafloor = SAMPLE_TEXTURE2D(_TerrainTex, sampler_TerrainTex, uv).rgb * float3(0.5, 0.65, 0.62);
+                        col = lerp(col, seafloor, (1.0 - smoothstep(0.0, 0.35, waterDepth)) * 0.40);
                     }
 
-                    // Underwater relief from Sobel normals
+                    // Underwater relief
                     if (_HasHeightmap > 0.5)
                     {
                         float3 uwN = normalize(float3(-dx * 8.0, -dy * 8.0, 1.0));
                         float uwL = 0.85 + 0.15 * max(dot(uwN, normalize(float3(-0.4, 0.3, 0.8))), 0.0);
-                        col *= lerp(1.0, uwL, (1.0 - depthT) * 0.5);
+                        col *= lerp(1.0, uwL, (1.0 - waterDepth) * 0.5);
                     }
 
-                    // Animated waves (2 octaves, stable UV)
-                    float w1 = smoothNoise(uv * 30.0 + float2(t, t * 0.7));
-                    float w2 = smoothNoise(uv * 55.0 + float2(-t * 0.6, t * 0.4));
-                    col += (w1 * 0.6 + w2 * 0.4 - 0.5) * lerp(0.010, 0.020, 1.0 - depthT);
+                    // Wave normal map (dual scroll for organic movement)
+                    if (_HasWaveNormal > 0.5)
+                    {
+                        float2 wUV1 = uv * _WaveScale + float2(t * 0.35, t * 0.25);
+                        float2 wUV2 = uv * (_WaveScale * 1.7) + float2(-t * 0.2, t * 0.4);
+                        float3 wn1 = SAMPLE_TEXTURE2D(_WaveNormalTex, sampler_WaveNormalTex, wUV1).rgb * 2.0 - 1.0;
+                        float3 wn2 = SAMPLE_TEXTURE2D(_WaveNormalTex, sampler_WaveNormalTex, wUV2).rgb * 2.0 - 1.0;
+                        float3 waveN = normalize(float3((wn1.xy + wn2.xy) * 0.5, 1.0));
 
-                    // Specular sun highlights
-                    float specS = lerp(50.0, 200.0, saturate((_ZoomLevel - 1.0) / 8.0));
-                    float specN = smoothNoise(uv * specS + float2(t * 0.5, t * 0.3));
-                    float spec = pow(saturate(specN * 1.2 - 0.1), 6.0) * 0.08;
-                    spec *= (1.0 - depthT * 0.3);
-                    col += float3(spec, spec * 0.97, spec * 0.92);
+                        // Specular from wave normals (sun glint)
+                        float2 sunDir2D = normalize(float2(-0.5, 0.3));
+                        float waveSpec = pow(saturate(dot(waveN.xy, sunDir2D) * 0.5 + 0.5), 32.0) * 0.25;
+                        waveSpec *= (1.0 - waterDepth * 0.5); // stronger in shallows
+                        col += float3(waveSpec, waveSpec * 0.96, waveSpec * 0.88);
 
-                    // Coast detection (8 neighbors)
+                        // Subtle wave color distortion
+                        col += (waveN.x * 0.008 + waveN.y * 0.005) * (1.0 - waterDepth);
+                    }
+                    else
+                    {
+                        // Fallback: procedural waves
+                        float w1 = smoothNoise(uv * 30.0 + float2(t, t * 0.7));
+                        float w2 = smoothNoise(uv * 55.0 + float2(-t * 0.6, t * 0.4));
+                        col += (w1 * 0.6 + w2 * 0.4 - 0.5) * lerp(0.010, 0.020, 1.0 - waterDepth);
+                        // Procedural specular
+                        float specN = smoothNoise(uv * 80.0 + float2(t * 0.5, t * 0.3));
+                        col += pow(saturate(specN * 1.2 - 0.1), 6.0) * 0.06;
+                    }
+
+                    // Coast detection
                     float coastDist = 0.0;
                     if (RGBToIndex(SampleProv(uv + float2(-px.x, -px.y))) > 0) coastDist += 0.7;
                     if (RGBToIndex(SampleProv(uv + float2(    0, -px.y))) > 0) coastDist += 1.0;
@@ -395,16 +417,16 @@ Shader "WarStrategy/MapShader"
                     if (RGBToIndex(SampleProv(uv + float2( px.x,  px.y))) > 0) coastDist += 0.7;
                     coastDist = saturate(coastDist * 0.12);
 
-                    // Shallow water brightening near coast
+                    // Coastal brightening
                     float coastGrad = saturate(1.0 - coastDist * 2.5);
                     coastGrad = coastGrad * coastGrad;
-                    col *= lerp(1.0, 1.12, coastGrad * 0.3);
+                    col *= lerp(1.0, 1.15, coastGrad * 0.3);
 
                     // Coastal foam
                     float foamN = smoothNoise(uv * 45.0 + t * 0.12);
                     float foamBand = smoothstep(0.01, 0.08, coastDist) * (1.0 - smoothstep(0.08, 0.16, coastDist));
                     float foam = foamBand * smoothstep(0.42, 0.68, foamN) * 0.22 * saturate((_ZoomLevel - 1.5) / 3.0);
-                    col = lerp(col, float3(0.78, 0.84, 0.86), foam);
+                    col = lerp(col, float3(0.82, 0.88, 0.92), foam);
                 }
                 else
                 {
@@ -524,7 +546,7 @@ Shader "WarStrategy/MapShader"
                     {
                         // Reconstruct normal from heightmap gradient (dx/dy computed earlier)
                         float3 normal = normalize(float3(-dx * _ElevationStrength, -dy * _ElevationStrength, 1.0));
-                        float3 sunDir = normalize(float3(-0.5, 0.3, 0.7)); // NW sun, dramatic angle
+                        float3 sunDir = normalize(float3(-1.5, 0.8, 2.0)); // very oblique NW sun — long ridge shadows
                         float diffuse = max(dot(normal, sunDir), 0.0);
                         float lighting = 0.55 + 0.45 * diffuse; // deeper shadows, brighter peaks
                         // Valley AO
@@ -728,9 +750,10 @@ Shader "WarStrategy/MapShader"
                         {
                             if (ownerC == selectedOwnerId)
                             {
-                                // Selected country: DRAMATICALLY brighter with golden warmth
-                                col = col * (1.0 + 0.45 * _SelectionDarken);
-                                col = lerp(col, col * float3(1.20, 1.10, 0.85), 0.6 * _SelectionDarken);
+                                // Multiplicative highlight: keeps terrain contrast intact
+                                float3 highlightCol = float3(1.3, 0.85, 0.35); // golden orange
+                                col *= lerp(float3(1,1,1), highlightCol, 0.5 * _SelectionDarken);
+                                col *= (1.0 + 0.15 * _SelectionDarken); // slight brightness boost
                             }
                             else
                             {
