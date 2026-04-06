@@ -13,8 +13,11 @@ Shader "WarStrategy/MapShader"
         _DetailTex ("Detail", 2D) = "gray" {}
         _TerrainTypeTex ("Terrain Types", 2D) = "black" {}
         _BiomeAtlas ("Biome Atlas", 2D) = "gray" {}
+        _OceanDeepTex ("Ocean Deep Texture", 2D) = "gray" {}
+        _OceanShallowTex ("Ocean Shallow Texture", 2D) = "gray" {}
 
         [Toggle] _HasTerrain ("Has Terrain", Float) = 0
+        [Toggle] _HasOceanTex ("Has Ocean Textures", Float) = 0
         [Toggle] _HasHeightmap ("Has Heightmap", Float) = 0
         [Toggle] _HasNoise ("Has Noise", Float) = 0
         [Toggle] _HasDetail ("Has Detail", Float) = 0
@@ -101,13 +104,15 @@ Shader "WarStrategy/MapShader"
             TEXTURE2D(_TerrainTypeTex); SAMPLER(sampler_TerrainTypeTex);
             TEXTURE2D(_BiomeAtlas);     SAMPLER(sampler_BiomeAtlas);
             TEXTURE2D(_OwnerLUT);       SAMPLER(sampler_OwnerLUT);
+            TEXTURE2D(_OceanDeepTex);   SAMPLER(sampler_OceanDeepTex);
+            TEXTURE2D(_OceanShallowTex); SAMPLER(sampler_OceanShallowTex);
 
             CBUFFER_START(UnityPerMaterial)
                 float _LUTWidth;
                 float4 _ProvinceTex_TexelSize;
                 float4 _HeightmapTex_TexelSize;
 
-                float _HasTerrain, _HasHeightmap, _HasNoise, _HasDetail, _HasTerrainTypes;
+                float _HasTerrain, _HasHeightmap, _HasNoise, _HasDetail, _HasTerrainTypes, _HasOceanTex;
                 float _CountryColorStr, _TerrainDesat, _ElevationStrength;
                 float _NoiseStr, _DetailStrength, _BiomeDetailStrength, _CoastGlowStr;
 
@@ -279,8 +284,8 @@ Shader "WarStrategy/MapShader"
                 {
                     height = SAMPLE_TEXTURE2D(_HeightmapTex, sampler_HeightmapTex, uv).r;
 
-                    // Parallax relief: shift terrain UV based on height (zoom-gated)
-                    float pomFade = saturate((_ZoomLevel - 4.0) / 6.0);
+                    // Parallax relief: LAND ONLY (skip for ocean to prevent seafloor sliding)
+                    float pomFade = (idx > 0) ? saturate((_ZoomLevel - 4.0) / 6.0) : 0.0;
                     if (pomFade > 0.01)
                     {
                         // Multi-step parallax (4 iterations for smooth depth)
@@ -309,8 +314,8 @@ Shader "WarStrategy/MapShader"
                     dy = (hBL + 2.0*hB + hBR) - (hTL + 2.0*hT + hTR);
                     relief = (-dx + dy) * _ElevationStrength;
 
-                    // Self-shadowing: trace toward sun in UV space (zoom-gated)
-                    float shadowFade = saturate((_ZoomLevel - 2.0) / 3.0);
+                    // Self-shadowing: LAND ONLY, zoom-gated
+                    float shadowFade = (idx > 0) ? saturate((_ZoomLevel - 2.0) / 3.0) : 0.0;
                     if (shadowFade > 0.01)
                     {
                         float2 sunUV = normalize(float2(-0.5, 0.3)) * hpx * 2.5;
@@ -337,86 +342,83 @@ Shader "WarStrategy/MapShader"
                 if (idx == 0)
                 {
                     // ════════════════════════════════════════
-                    // OCEAN — realistic depth with visible seafloor
+                    // OCEAN — texture-based realistic water
                     // ════════════════════════════════════════
 
                     float depth = 1.0 - height;
-
-                    // Base water color gradient (shallow teal → deep navy)
-                    float3 deepCol = _OceanDeep.rgb;
-                    float3 midCol  = _OceanMid.rgb;
-                    float3 shallowCol = _OceanShallow.rgb;
                     float depthT = saturate(depth * 1.5);
-                    col = lerp(shallowCol, lerp(midCol, deepCol, saturate((depthT - 0.4) / 0.6)), depthT);
+                    float t = _Time.y * 0.06;
 
-                    // Visible seafloor: use ORIGINAL uv (not parallax-shifted) to prevent movement on zoom
+                    // ── Base water from ocean textures (zoom-scaled tiling) ──
+                    if (_HasOceanTex > 0.5)
+                    {
+                        // Scroll UVs slowly for living water
+                        float2 deepUV1 = uv * 6.0 + float2(t * 0.3, t * 0.2);
+                        float2 deepUV2 = uv * 9.0 + float2(-t * 0.2, t * 0.35);
+                        float3 deepSample1 = SAMPLE_TEXTURE2D(_OceanDeepTex, sampler_OceanDeepTex, deepUV1).rgb;
+                        float3 deepSample2 = SAMPLE_TEXTURE2D(_OceanDeepTex, sampler_OceanDeepTex, deepUV2).rgb;
+                        float3 deepWater = deepSample1 * 0.6 + deepSample2 * 0.4;
+
+                        float2 shallowUV1 = uv * 8.0 + float2(t * 0.25, -t * 0.15);
+                        float2 shallowUV2 = uv * 12.0 + float2(-t * 0.18, t * 0.28);
+                        float3 shallowSample1 = SAMPLE_TEXTURE2D(_OceanShallowTex, sampler_OceanShallowTex, shallowUV1).rgb;
+                        float3 shallowSample2 = SAMPLE_TEXTURE2D(_OceanShallowTex, sampler_OceanShallowTex, shallowUV2).rgb;
+                        float3 shallowWater = shallowSample1 * 0.6 + shallowSample2 * 0.4;
+
+                        // Blend textures based on depth
+                        col = lerp(shallowWater, deepWater, depthT);
+
+                        // Tint to match our palette
+                        col = col * lerp(_OceanShallow.rgb * 1.8, _OceanDeep.rgb * 2.2, depthT);
+
+                        // Close-zoom: add higher frequency texture detail
+                        float closeZoom = saturate((_ZoomLevel - 5.0) / 6.0);
+                        if (closeZoom > 0.01)
+                        {
+                            float2 closeUV = uv * 25.0 + float2(t * 0.4, -t * 0.3);
+                            float3 closeTex = SAMPLE_TEXTURE2D(_OceanDeepTex, sampler_OceanDeepTex, closeUV).rgb;
+                            col = lerp(col, col * closeTex * 2.0, 0.15 * closeZoom);
+                        }
+                    }
+                    else
+                    {
+                        // Fallback: procedural color gradient
+                        col = lerp(_OceanShallow.rgb, lerp(_OceanMid.rgb, _OceanDeep.rgb,
+                            saturate((depthT - 0.4) / 0.6)), depthT);
+                    }
+
+                    // ── Underwater terrain visible through water ──
                     if (_HasTerrain > 0.5)
                     {
                         float3 oceanTerrain = SAMPLE_TEXTURE2D(_TerrainTex, sampler_TerrainTex, uv).rgb;
-                        float3 seafloor = oceanTerrain * float3(0.55, 0.72, 0.70);
-                        float seafloorVis = (1.0 - smoothstep(0.0, 0.45, depthT)) * 0.55;
-                        // Stronger seafloor at close zoom
-                        seafloorVis *= lerp(1.0, 1.4, saturate((_ZoomLevel - 3.0) / 6.0));
+                        float3 seafloor = oceanTerrain * float3(0.50, 0.68, 0.65);
+                        float seafloorVis = (1.0 - smoothstep(0.0, 0.40, depthT)) * 0.50;
+                        seafloorVis *= lerp(1.0, 1.3, saturate((_ZoomLevel - 3.0) / 6.0));
                         col = lerp(col, seafloor, seafloorVis);
                     }
 
-                    // Underwater relief from heightmap — Sobel normals for underwater terrain
+                    // ── Underwater relief lighting ──
                     if (_HasHeightmap > 0.5)
                     {
                         float3 uwNormal = normalize(float3(-dx * 10.0, -dy * 10.0, 1.0));
-                        float3 uwSun = normalize(float3(-0.4, 0.3, 0.8));
-                        float uwDiffuse = max(dot(uwNormal, uwSun), 0.0);
-                        float uwLighting = 0.80 + 0.20 * uwDiffuse;
-                        col *= lerp(1.0, uwLighting, (1.0 - depthT) * 0.7);
+                        float uwDiffuse = max(dot(uwNormal, normalize(float3(-0.4, 0.3, 0.8))), 0.0);
+                        col *= lerp(1.0, 0.82 + 0.18 * uwDiffuse, (1.0 - depthT) * 0.6);
                     }
 
-                    // Water color variation based on depth bands (continental shelf visible)
-                    float shelfEdge = smoothstep(0.25, 0.35, depthT) * (1.0 - smoothstep(0.35, 0.50, depthT));
-                    col = lerp(col, col * float3(0.90, 0.95, 1.05), shelfEdge * 0.15);
+                    // ── Animated wave overlay (procedural on top of texture) ──
+                    float wave1 = smoothNoise(uv * 30.0 + float2(t, t * 0.7));
+                    float wave2 = smoothNoise(uv * 55.0 + float2(-t * 0.6, t * 0.4));
+                    col += (wave1 * 0.6 + wave2 * 0.4 - 0.5) * lerp(0.010, 0.022, 1.0 - depthT);
 
-                    // Zoom-adaptive wave animation
-                    float t = _Time.y * 0.08;
-                    // Base waves (always visible, large scale ocean movement)
-                    float wave1 = smoothNoise(uv * 25.0 + float2(t, t * 0.7));
-                    float wave2 = smoothNoise(uv * 60.0 + float2(-t * 0.6, t * 0.4));
-                    float wavePattern = wave1 * 0.6 + wave2 * 0.4;
-                    float waveStr = lerp(0.012, 0.028, saturate(1.0 - depthT));
-                    col += (wavePattern - 0.5) * waveStr;
+                    // ── Specular sun reflections ──
+                    float specScale = lerp(60.0, 300.0, saturate((_ZoomLevel - 1.0) / 8.0));
+                    float specNoise = smoothNoise(uv * specScale + float2(t * 0.5, t * 0.35));
+                    float spec = pow(saturate(specNoise * 1.3 - 0.2), 5.0) * 0.10;
+                    spec *= lerp(0.8, 1.5, saturate((_ZoomLevel - 3.0) / 6.0));
+                    spec *= (1.0 - depthT * 0.3);
+                    col += float3(spec, spec * 0.97, spec * 0.90);
 
-                    // Close-zoom waves: visible ripples and surface texture (zoom 3+)
-                    float waveZoom1 = saturate((_ZoomLevel - 3.0) / 4.0);
-                    if (waveZoom1 > 0.01)
-                    {
-                        float ripple1 = smoothNoise(uv * 200.0 + float2(t * 1.2, -t * 0.8));
-                        float ripple2 = smoothNoise(uv * 350.0 + float2(-t * 0.9, t * 1.1));
-                        float ripples = ripple1 * 0.6 + ripple2 * 0.4;
-                        col += (ripples - 0.5) * 0.025 * waveZoom1;
-                    }
-
-                    // Ultra-close waves: fine water texture (zoom 8+)
-                    float waveZoom2 = saturate((_ZoomLevel - 8.0) / 6.0);
-                    if (waveZoom2 > 0.01)
-                    {
-                        float micro1 = smoothNoise(uv * 600.0 + float2(t * 1.5, t * 0.6));
-                        float micro2 = smoothNoise(uv * 900.0 + float2(-t * 0.7, t * 1.3));
-                        float microWaves = micro1 * 0.5 + micro2 * 0.5;
-                        col += (microWaves - 0.5) * 0.018 * waveZoom2;
-
-                        // Water surface color variation at close zoom
-                        float surfVar = smoothNoise(uv * 150.0 + t * 0.3);
-                        col = lerp(col, col * lerp(float3(0.95, 0.98, 1.02), float3(1.02, 1.0, 0.96), surfVar), 0.08 * waveZoom2);
-                    }
-
-                    // Specular highlights — zoom-adaptive sun reflection
-                    float specScale = lerp(80.0, 400.0, saturate((_ZoomLevel - 2.0) / 8.0));
-                    float specWave = smoothNoise(uv * specScale + float2(t * 0.5, t * 0.3));
-                    float specular = pow(saturate(specWave * 1.3 - 0.15), 6.0) * 0.12;
-                    specular *= (1.0 - depthT * 0.4);
-                    // Boost specular at close zoom so it's visible
-                    specular *= lerp(1.0, 2.0, saturate((_ZoomLevel - 4.0) / 6.0));
-                    col += float3(specular, specular * 0.98, specular * 0.92);
-
-                    // Coast proximity detection (8 neighbors)
+                    // ── Coast detection (8 neighbors) ──
                     float coastDist = 0.0;
                     if (RGBToIndex(SampleProv(uv + float2(-px.x, -px.y))) > 0) coastDist += 0.7;
                     if (RGBToIndex(SampleProv(uv + float2(    0, -px.y))) > 0) coastDist += 1.0;
@@ -428,29 +430,18 @@ Shader "WarStrategy/MapShader"
                     if (RGBToIndex(SampleProv(uv + float2( px.x,  px.y))) > 0) coastDist += 0.7;
                     coastDist = saturate(coastDist * 0.12);
 
-                    // Coastal shallow water — wider gradient, softer transition
-                    float coastGradient = saturate(1.0 - coastDist * 2.5); // wider than before
-                    coastGradient = coastGradient * coastGradient * coastGradient; // cubic for smooth falloff
-                    // Blend toward brighter, warmer shallow water near coast
-                    float3 nearShore = lerp(float3(0.22, 0.48, 0.52), float3(0.30, 0.55, 0.55), coastGradient);
-                    col = lerp(col, nearShore, coastGradient * 0.40);
-                    // Slight brightening near shore (sunlit shallows)
-                    col *= lerp(1.0, 1.12, coastGradient * 0.3);
+                    // ── Shallow water gradient near coast ──
+                    float coastGrad = saturate(1.0 - coastDist * 2.5);
+                    coastGrad = coastGrad * coastGrad * coastGrad;
+                    col = lerp(col, col * float3(1.08, 1.12, 1.10), coastGrad * 0.3);
+                    col *= lerp(1.0, 1.10, coastGrad * 0.25);
 
-                    // Coastal foam — animated white-water band
-                    float foamNoise = smoothNoise(uv * 40.0 + _Time.y * 0.1);
-                    float foamLine = smoothstep(0.01, 0.08, coastDist) * (1.0 - smoothstep(0.08, 0.18, coastDist));
+                    // ── Coastal foam ──
+                    float foamNoise = smoothNoise(uv * 45.0 + t * 0.12);
+                    float foamBand = smoothstep(0.01, 0.08, coastDist) * (1.0 - smoothstep(0.08, 0.16, coastDist));
                     float foamFade = saturate((_ZoomLevel - 1.5) / 3.0);
-                    float foam = foamLine * smoothstep(0.40, 0.65, foamNoise) * 0.30 * foamFade;
-                    // Second foam layer at close zoom for more detail
-                    float foamZoom = saturate((_ZoomLevel - 5.0) / 5.0);
-                    if (foamZoom > 0.01)
-                    {
-                        float foamDetail = smoothNoise(uv * 120.0 + _Time.y * 0.15);
-                        float finefoam = smoothstep(0.01, 0.06, coastDist) * (1.0 - smoothstep(0.06, 0.12, coastDist));
-                        foam += finefoam * smoothstep(0.45, 0.7, foamDetail) * 0.20 * foamZoom;
-                    }
-                    col = lerp(col, float3(0.80, 0.86, 0.88), foam);
+                    float foam = foamBand * smoothstep(0.42, 0.68, foamNoise) * 0.25 * foamFade;
+                    col = lerp(col, float3(0.82, 0.88, 0.90), foam);
                 }
                 else
                 {

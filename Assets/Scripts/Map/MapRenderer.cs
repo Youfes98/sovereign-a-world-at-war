@@ -161,6 +161,18 @@ namespace WarStrategy.Map
                 _mapMaterial.SetTexture("_BiomeAtlas", tex);
             });
 
+            // Ocean textures
+            yield return LoadTextureAsync("Map/ocean_deep", tex =>
+            {
+                _mapMaterial.SetTexture("_OceanDeepTex", tex);
+                _mapMaterial.SetFloat("_HasOceanTex", 1f);
+            });
+
+            yield return LoadTextureAsync("Map/ocean_shallow", tex =>
+            {
+                _mapMaterial.SetTexture("_OceanShallowTex", tex);
+            });
+
 #if UNITY_EDITOR
             Debug.Log("[MapRenderer] All textures loaded.");
 #endif
