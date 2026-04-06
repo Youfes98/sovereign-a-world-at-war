@@ -409,17 +409,28 @@ namespace WarStrategy.UI
             if (dateLabel != null && Services.Clock != null)
                 dateLabel.text = Services.Clock.GetDateString();
 
-            // Load resource icons via C# (USS resource() is unreliable)
+            // Load resource icons via C# (try Texture2D first, then Sprite)
             string[] iconNames = { "icon_treasury", "icon_manpower", "icon_energy", "icon_military", "icon_stability" };
             foreach (var iconName in iconNames)
             {
                 var iconEl = _gameplayHudPanel.Q(iconName);
-                if (iconEl != null)
+                if (iconEl == null) continue;
+
+                // Try loading as Texture2D first
+                var tex = Resources.Load<Texture2D>($"UI/Icons/{iconName}");
+                if (tex != null)
                 {
-                    var tex = Resources.Load<Texture2D>($"UI/Icons/{iconName}");
-                    if (tex != null)
-                        iconEl.style.backgroundImage = new StyleBackground(tex);
+                    iconEl.style.backgroundImage = new StyleBackground(tex);
+                    continue;
                 }
+                // Fallback: try loading as Sprite
+                var sprite = Resources.Load<Sprite>($"UI/Icons/{iconName}");
+                if (sprite != null)
+                    iconEl.style.backgroundImage = new StyleBackground(sprite);
+#if UNITY_EDITOR
+                else
+                    Debug.LogWarning($"[GameFlow] Icon not found: UI/Icons/{iconName}");
+#endif
             }
 
             // Populate resource values
