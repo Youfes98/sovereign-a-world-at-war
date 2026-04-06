@@ -4,199 +4,114 @@
         style="position: absolute; left: 0; top: 0; right: 0; bottom: 0;"
         picking-mode="Ignore">
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- TOP BAR                                     -->
-        <!-- ═══════════════════════════════════════════ -->
-        <ui:VisualElement name="top-bar"
-            picking-mode="Position"
-            style="position: absolute; left: 0; top: 0; right: 0; height: 44px;
-                   flex-direction: row; align-items: center; justify-content: space-between;
-                   background-color: #141A22;
-                   border-bottom-width: 1px; border-bottom-color: rgba(80, 100, 130, 0.2);
-                   padding-left: 14px; padding-right: 14px;">
+        <!-- ═══ TOP BAR ═══ -->
+        <ui:VisualElement name="top-bar" class="hud-top-bar" picking-mode="Position">
 
-            <!-- LEFT: Flag + Name -->
-            <ui:VisualElement name="top-bar-left"
-                style="flex-direction: row; align-items: center; flex-shrink: 0;">
+            <!-- Left: Home + Flag + Name -->
+            <ui:VisualElement class="hud-top-left">
+                <ui:Button name="home-btn" class="hud-home-btn">
+                    <ui:VisualElement class="hud-home-icon" />
+                </ui:Button>
 
-                <ui:VisualElement name="player-flag"
-                    style="width: 28px; height: 20px;
-                           border-radius: 2px;
-                           border-width: 1px; border-color: rgba(255,255,255,0.12);
-                           margin-right: 10px;
-                           overflow: hidden;
-                           background-size: cover;" />
+                <ui:VisualElement name="player-flag" class="hud-flag" />
 
-                <ui:Label name="player-name" text=""
-                    style="font-size: 13px; color: #E6E1D8; -unity-font-style: bold;" />
+                <ui:Label name="player-name" class="hud-player-name" text="" />
             </ui:VisualElement>
 
-            <!-- CENTER: Resources -->
-            <ui:VisualElement name="resource-bar"
-                style="flex-direction: row; align-items: center;
-                       background-color: rgba(0,0,0,0.2);
-                       border-radius: 3px;
-                       padding: 5px 12px;">
+            <!-- Center: Resource counters -->
+            <ui:VisualElement name="resource-bar" class="hud-top-center">
 
-                <!-- GDP -->
-                <ui:Label text="GDP" style="font-size: 9px; color: #667788; margin-right: 4px; -unity-font-style: bold;" />
-                <ui:Label name="gdp-value" text=""
-                    style="font-size: 12px; color: #D6B36A; -unity-font-style: bold; margin-right: 18px;" />
-
-                <!-- Population -->
-                <ui:Label text="POP" style="font-size: 9px; color: #667788; margin-right: 4px; -unity-font-style: bold;" />
-                <ui:Label name="pop-value" text=""
-                    style="font-size: 12px; color: #8CB4D8; -unity-font-style: bold; margin-right: 18px;" />
-
-                <!-- Balance -->
-                <ui:Label text="BAL" style="font-size: 9px; color: #667788; margin-right: 4px; -unity-font-style: bold;" />
-                <ui:Label name="balance-value" text=""
-                    style="font-size: 12px; color: #4CAF50; -unity-font-style: bold; margin-right: 18px;" />
-
-                <!-- Military -->
-                <ui:Label text="MIL" style="font-size: 9px; color: #667788; margin-right: 4px; -unity-font-style: bold;" />
-                <ui:Label name="military-value" text=""
-                    style="font-size: 12px; color: #CC7755; -unity-font-style: bold; margin-right: 18px;" />
-
-                <!-- Stability -->
-                <ui:Label text="STAB" style="font-size: 9px; color: #667788; margin-right: 4px; -unity-font-style: bold;" />
-                <ui:Label name="stability-value" text=""
-                    style="font-size: 12px; color: #66BB6A; -unity-font-style: bold;" />
-
-                <!-- Manpower (hidden label, still bound) -->
-                <ui:Label name="manpower-value" text="" style="display: none;" />
-            </ui:VisualElement>
-
-            <!-- RIGHT: Date + Speed + Menu -->
-            <ui:VisualElement name="top-bar-right"
-                style="flex-direction: row; align-items: center; flex-shrink: 0;">
-
-                <ui:Label name="game-date" text=""
-                    style="font-size: 11px; color: #8899AA; margin-right: 14px;" />
-
-                <!-- Speed Controls: << | II | speed | >> -->
-                <ui:VisualElement name="speed-controls"
-                    style="flex-direction: row; align-items: center;
-                           background-color: rgba(0, 0, 0, 0.3);
-                           border-radius: 3px; border-width: 1px; border-color: rgba(255,255,255,0.06);
-                           padding: 3px 4px; margin-right: 10px;">
-
-                    <ui:Button name="speed-down-btn" text="&#x25C0;"
-                        style="width: 22px; height: 20px;
-                               background-color: rgba(0,0,0,0); color: #8899AA; font-size: 9px;
-                               border-width: 0; -unity-text-align: middle-center;" />
-
-                    <ui:Button name="pause-btn" text="II"
-                        style="width: 24px; height: 20px;
-                               background-color: rgba(0,0,0,0); color: #AABBCC; font-size: 10px;
-                               border-width: 0; -unity-text-align: middle-center;
-                               -unity-font-style: bold;" />
-
-                    <ui:Label name="speed-label" text="1x"
-                        style="font-size: 11px; color: #D6B36A; -unity-font-style: bold;
-                               min-width: 24px; -unity-text-align: middle-center;" />
-
-                    <ui:Button name="speed-up-btn" text="&#x25B6;"
-                        style="width: 22px; height: 20px;
-                               background-color: rgba(0,0,0,0); color: #8899AA; font-size: 9px;
-                               border-width: 0; -unity-text-align: middle-center;" />
+                <ui:VisualElement class="hud-resource-item">
+                    <ui:VisualElement class="hud-resource-icon"
+                        style="background-image: resource('UI/Icons/icon_treasury');" />
+                    <ui:Label name="gdp-value" class="hud-resource-value hud-resource-value--gold" text="" />
                 </ui:VisualElement>
 
-                <ui:Button name="menu-btn" text="&#x2630;"
-                    style="width: 28px; height: 28px;
-                           background-color: rgba(0,0,0,0); color: #667788; font-size: 16px;
-                           border-width: 0; -unity-text-align: middle-center;" />
+                <ui:VisualElement class="hud-resource-item">
+                    <ui:VisualElement class="hud-resource-icon"
+                        style="background-image: resource('UI/Icons/icon_manpower');" />
+                    <ui:Label name="manpower-value" class="hud-resource-value" text="" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="hud-resource-item">
+                    <ui:VisualElement class="hud-resource-icon"
+                        style="background-image: resource('UI/Icons/icon_energy');" />
+                    <ui:Label name="balance-value" class="hud-resource-value hud-resource-value--green" text="" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="hud-resource-item">
+                    <ui:VisualElement class="hud-resource-icon"
+                        style="background-image: resource('UI/Icons/icon_resources');" />
+                    <ui:Label name="pop-value" class="hud-resource-value" text="" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="hud-resource-item">
+                    <ui:VisualElement class="hud-resource-icon"
+                        style="background-image: resource('UI/Icons/icon_military');" />
+                    <ui:Label name="military-value" class="hud-resource-value" text="" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="hud-resource-item hud-resource-item--last">
+                    <ui:VisualElement class="hud-resource-icon"
+                        style="background-image: resource('UI/Icons/icon_stability');" />
+                    <ui:Label name="stability-value" class="hud-resource-value" text="" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Right: Date + Speed + Menu -->
+            <ui:VisualElement class="hud-top-right">
+                <ui:Label name="game-date" class="hud-date" text="" />
+
+                <ui:VisualElement class="hud-speed-container">
+                    <ui:Button name="speed-down-btn" class="hud-speed-btn" text="&#x25C0;" />
+                    <ui:Button name="pause-btn" class="hud-speed-btn"
+                        style="-unity-font-style: bold; color: #AABBCC;" text="II" />
+                    <ui:Label name="speed-label" class="hud-speed-label" text="1x" />
+                    <ui:Button name="speed-up-btn" class="hud-speed-btn" text="&#x25B6;" />
+                </ui:VisualElement>
+
+                <ui:Button name="menu-btn" class="hud-menu-btn">
+                    <ui:VisualElement class="hud-menu-icon" />
+                </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- LEFT NAV PANEL — text labels, no emoji      -->
-        <!-- ═══════════════════════════════════════════ -->
-        <ui:VisualElement name="left-panel"
-            picking-mode="Position"
-            style="position: absolute; left: 0; top: 52px;
-                   flex-direction: column;
-                   background-color: rgba(16, 22, 30, 0.92);
-                   border-right-width: 1px; border-right-color: rgba(255,255,255,0.06);
-                   border-bottom-right-radius: 6px;
-                   padding: 8px 0; width: 80px;">
+        <!-- ═══ LEFT NAV PANEL ═══ -->
+        <ui:VisualElement name="left-panel" class="hud-left-panel" picking-mode="Position">
 
-            <ui:Button name="btn-diplomacy" text="DPL"
-                style="height: 44px; margin: 0 8px 2px 8px;
-                       background-color: rgba(255,255,255,0.03);
-                       border-width: 0; border-radius: 4px;
-                       color: #778899; font-size: 10px; -unity-font-style: bold;
-                       letter-spacing: 1px;
-                       -unity-text-align: middle-center;" />
+            <ui:Button name="btn-diplomacy" class="hud-nav-btn">
+                <ui:VisualElement class="hud-nav-icon"
+                    style="background-image: resource('UI/Icons/icon_diplomacy');" />
+                <ui:Label class="hud-nav-label" text="Diplomacy" />
+            </ui:Button>
 
-            <ui:Button name="btn-research" text="RES"
-                style="height: 44px; margin: 0 8px 2px 8px;
-                       background-color: rgba(255,255,255,0.03);
-                       border-width: 0; border-radius: 4px;
-                       color: #778899; font-size: 10px; -unity-font-style: bold;
-                       letter-spacing: 1px;
-                       -unity-text-align: middle-center;" />
+            <ui:Button name="btn-research" class="hud-nav-btn">
+                <ui:VisualElement class="hud-nav-icon"
+                    style="background-image: resource('UI/Icons/icon_research');" />
+                <ui:Label class="hud-nav-label" text="Research" />
+            </ui:Button>
 
-            <ui:Button name="btn-production" text="PRD"
-                style="height: 44px; margin: 0 8px 2px 8px;
-                       background-color: rgba(255,255,255,0.03);
-                       border-width: 0; border-radius: 4px;
-                       color: #778899; font-size: 10px; -unity-font-style: bold;
-                       letter-spacing: 1px;
-                       -unity-text-align: middle-center;" />
+            <ui:Button name="btn-production" class="hud-nav-btn">
+                <ui:VisualElement class="hud-nav-icon"
+                    style="background-image: resource('UI/Icons/icon_production');" />
+                <ui:Label class="hud-nav-label" text="Production" />
+            </ui:Button>
 
-            <ui:Button name="btn-espionage" text="INT"
-                style="height: 44px; margin: 0 8px 0 8px;
-                       background-color: rgba(255,255,255,0.03);
-                       border-width: 0; border-radius: 4px;
-                       color: #778899; font-size: 10px; -unity-font-style: bold;
-                       letter-spacing: 1px;
-                       -unity-text-align: middle-center;" />
+            <ui:Button name="btn-espionage" class="hud-nav-btn">
+                <ui:VisualElement class="hud-nav-icon"
+                    style="background-image: resource('UI/Icons/icon_espionage');" />
+                <ui:Label class="hud-nav-label" text="Espionage" />
+            </ui:Button>
         </ui:VisualElement>
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- BOTTOM TAB BAR                              -->
-        <!-- ═══════════════════════════════════════════ -->
-        <ui:VisualElement name="bottom-bar"
-            picking-mode="Position"
-            style="position: absolute; bottom: 8px; left: 50%;
-                   translate: -50% 0;
-                   flex-direction: row; align-items: center;
-                   background-color: rgba(20, 26, 34, 0.92);
-                   border-radius: 6px;
-                   border-width: 1px; border-color: rgba(255,255,255,0.06);
-                   padding: 4px;">
-
-            <ui:Button name="tab-economy" text="Economy"
-                style="padding: 7px 22px;
-                       background-color: rgba(214, 179, 106, 0.12);
-                       border-width: 1px; border-color: rgba(214, 179, 106, 0.25);
-                       border-radius: 4px;
-                       color: #D6B36A; font-size: 11px; -unity-font-style: bold;
-                       margin-right: 3px;" />
-
-            <ui:Button name="tab-military" text="Military"
-                style="padding: 7px 22px;
-                       background-color: transparent;
-                       border-width: 1px; border-color: rgba(255,255,255,0.04);
-                       border-radius: 4px;
-                       color: #667788; font-size: 11px;
-                       margin-right: 3px;" />
-
-            <ui:Button name="tab-technology" text="Technology"
-                style="padding: 7px 22px;
-                       background-color: transparent;
-                       border-width: 1px; border-color: rgba(255,255,255,0.04);
-                       border-radius: 4px;
-                       color: #667788; font-size: 11px;
-                       margin-right: 3px;" />
-
-            <ui:Button name="tab-diplomacy" text="Diplomacy"
-                style="padding: 7px 22px;
-                       background-color: transparent;
-                       border-width: 1px; border-color: rgba(255,255,255,0.04);
-                       border-radius: 4px;
-                       color: #667788; font-size: 11px;" />
+        <!-- ═══ BOTTOM BAR ═══ -->
+        <ui:VisualElement name="bottom-bar" class="hud-bottom-bar" picking-mode="Position">
+            <ui:VisualElement class="hud-bottom-tabs">
+                <ui:Button name="tab-economy" class="hud-tab hud-tab--active" text="Economy" />
+                <ui:Button name="tab-military" class="hud-tab" text="Military" />
+                <ui:Button name="tab-technology" class="hud-tab" text="Technology" />
+                <ui:Button name="tab-diplomacy" class="hud-tab" text="Diplomacy" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
     </ui:VisualElement>

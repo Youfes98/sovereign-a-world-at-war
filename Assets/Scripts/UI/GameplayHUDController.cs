@@ -132,9 +132,8 @@ namespace WarStrategy.UI
             {
                 float balance = country.MonthlyBalance;
                 _balanceValue.text = (balance >= 0 ? "+" : "") + FormatCurrency(balance);
-                _balanceValue.style.color = balance >= 0
-                    ? new Color(0.30f, 0.69f, 0.31f) // green
-                    : new Color(0.75f, 0.22f, 0.17f); // red
+                _balanceValue.EnableInClassList("hud-resource-value--green", balance >= 0);
+                _balanceValue.EnableInClassList("hud-resource-value--red", balance < 0);
             }
 
             if (_popValue != null)
@@ -186,29 +185,9 @@ namespace WarStrategy.UI
         private void SetActiveTab(Button tab)
         {
             if (_activeTab == tab) return;
-
-            // Deactivate old tab
-            if (_activeTab != null)
-            {
-                _activeTab.style.backgroundColor = new Color(1, 1, 1, 0.03f);
-                _activeTab.style.borderTopColor = new Color(1, 1, 1, 0.06f);
-                _activeTab.style.borderBottomColor = new Color(1, 1, 1, 0.06f);
-                _activeTab.style.borderLeftColor = new Color(1, 1, 1, 0.06f);
-                _activeTab.style.borderRightColor = new Color(1, 1, 1, 0.06f);
-                _activeTab.style.color = new Color(0.53f, 0.60f, 0.67f);
-            }
-
-            // Activate new tab
+            _activeTab?.RemoveFromClassList("hud-tab--active");
             _activeTab = tab;
-            if (_activeTab != null)
-            {
-                _activeTab.style.backgroundColor = new Color(0.84f, 0.70f, 0.42f, 0.15f);
-                _activeTab.style.borderTopColor = new Color(0.84f, 0.70f, 0.42f, 0.3f);
-                _activeTab.style.borderBottomColor = new Color(0.84f, 0.70f, 0.42f, 0.3f);
-                _activeTab.style.borderLeftColor = new Color(0.84f, 0.70f, 0.42f, 0.3f);
-                _activeTab.style.borderRightColor = new Color(0.84f, 0.70f, 0.42f, 0.3f);
-                _activeTab.style.color = new Color(0.84f, 0.70f, 0.42f);
-            }
+            _activeTab?.AddToClassList("hud-tab--active");
         }
 
         public void Cleanup()

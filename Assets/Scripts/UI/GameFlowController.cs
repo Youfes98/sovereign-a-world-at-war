@@ -139,6 +139,8 @@ namespace WarStrategy.UI
             if (mainMenuUSS != null) _uiRoot.styleSheets.Add(mainMenuUSS);
             if (countrySelectUSS != null) _uiRoot.styleSheets.Add(countrySelectUSS);
             if (countryInfoUSS != null) _uiRoot.styleSheets.Add(countryInfoUSS);
+            var gameplayHudUSS = Resources.Load<StyleSheet>("UI/GameplayHUD");
+            if (gameplayHudUSS != null) _uiRoot.styleSheets.Add(gameplayHudUSS);
 
             // Initialize transition overlay (must be first — sits on top)
             _transition = new TransitionController();

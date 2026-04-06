@@ -1,0 +1,275 @@
+/* ═══════════════════════════════════════════════════════════ */
+/* GameplayHUD.uss — Premium dark UI matching reference mockup */
+/* ═══════════════════════════════════════════════════════════ */
+
+/* ── TOP BAR ── */
+.hud-top-bar {
+    position: absolute;
+    left: 0; top: 0; right: 0;
+    height: 50px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #0F1824;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(60, 80, 110, 0.25);
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.hud-top-left {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.hud-top-center {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.25);
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(60, 80, 110, 0.15);
+    padding: 4px 14px;
+}
+
+.hud-top-right {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* Home button */
+.hud-home-btn {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(212, 168, 67, 0.08);
+    border-width: 1px;
+    border-color: rgba(212, 168, 67, 0.3);
+    border-radius: 6px;
+    margin-right: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.hud-home-btn:hover {
+    background-color: rgba(212, 168, 67, 0.15);
+    border-color: rgba(212, 168, 67, 0.5);
+}
+
+.hud-home-icon {
+    width: 22px;
+    height: 22px;
+    background-image: resource("UI/Icons/icon_home");
+    -unity-background-image-tint-color: #D4A843;
+}
+
+/* Player flag */
+.hud-flag {
+    width: 28px;
+    height: 20px;
+    border-radius: 2px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    margin-right: 8px;
+    overflow: hidden;
+}
+
+/* Player name */
+.hud-player-name {
+    font-size: 15px;
+    color: #E8E8E8;
+    -unity-font-style: bold;
+}
+
+/* ── RESOURCE ITEMS ── */
+.hud-resource-item {
+    flex-direction: row;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.hud-resource-item--last {
+    margin-right: 0;
+}
+
+.hud-resource-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 5px;
+    -unity-background-image-tint-color: #D4A843;
+}
+
+.hud-resource-value {
+    font-size: 13px;
+    color: #E8E8E8;
+    -unity-font-style: bold;
+}
+
+.hud-resource-value--gold {
+    color: #D4A843;
+}
+
+.hud-resource-value--green {
+    color: #4CAF50;
+}
+
+.hud-resource-value--red {
+    color: #C0392B;
+}
+
+/* ── DATE & SPEED ── */
+.hud-date {
+    font-size: 12px;
+    color: #8899AA;
+    margin-right: 12px;
+}
+
+.hud-speed-container {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.06);
+    padding: 3px 4px;
+    margin-right: 8px;
+}
+
+.hud-speed-btn {
+    width: 24px;
+    height: 22px;
+    background-color: rgba(0, 0, 0, 0);
+    color: #8899AA;
+    font-size: 10px;
+    border-width: 0;
+    -unity-text-align: middle-center;
+}
+
+.hud-speed-btn:hover {
+    color: #D4A843;
+}
+
+.hud-speed-label {
+    font-size: 12px;
+    color: #D4A843;
+    -unity-font-style: bold;
+    min-width: 26px;
+    -unity-text-align: middle-center;
+}
+
+.hud-menu-btn {
+    width: 32px;
+    height: 32px;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.hud-menu-icon {
+    width: 20px;
+    height: 20px;
+    background-image: resource("UI/Icons/icon_menu");
+    -unity-background-image-tint-color: #667788;
+}
+
+.hud-menu-btn:hover .hud-menu-icon {
+    -unity-background-image-tint-color: #D4A843;
+}
+
+/* ── LEFT NAV PANEL ── */
+.hud-left-panel {
+    position: absolute;
+    left: 0;
+    top: 58px;
+    width: 92px;
+    flex-direction: column;
+    background-color: rgba(10, 18, 30, 0.92);
+    border-right-width: 1px;
+    border-right-color: rgba(60, 80, 110, 0.15);
+    border-bottom-right-radius: 8px;
+    padding: 8px 0;
+}
+
+.hud-nav-btn {
+    height: 70px;
+    margin-left: 6px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+    background-color: rgba(255, 255, 255, 0.02);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.hud-nav-btn:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(212, 168, 67, 0.2);
+}
+
+.hud-nav-btn--active {
+    background-color: rgba(212, 168, 67, 0.10);
+    border-color: rgba(212, 168, 67, 0.3);
+}
+
+.hud-nav-icon {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 4px;
+    -unity-background-image-tint-color: #D4A843;
+}
+
+.hud-nav-label {
+    font-size: 9px;
+    color: #8899AA;
+    -unity-text-align: middle-center;
+}
+
+/* ── BOTTOM BAR ── */
+.hud-bottom-bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(10, 18, 30, 0.95);
+    border-top-width: 1px;
+    border-top-color: rgba(60, 80, 110, 0.2);
+}
+
+.hud-bottom-tabs {
+    height: 40px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+}
+
+.hud-tab {
+    padding-top: 7px;
+    padding-bottom: 7px;
+    padding-left: 28px;
+    padding-right: 28px;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.04);
+    border-radius: 4px;
+    color: #667788;
+    font-size: 12px;
+    margin-right: 4px;
+}
+
+.hud-tab:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    color: #AABBCC;
+}
+
+.hud-tab--active {
+    background-color: rgba(212, 168, 67, 0.12);
+    border-color: rgba(212, 168, 67, 0.3);
+    color: #D4A843;
+    -unity-font-style: bold;
+}
