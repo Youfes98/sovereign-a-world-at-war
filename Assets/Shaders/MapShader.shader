@@ -267,11 +267,6 @@ Shader "WarStrategy/MapShader"
                 if (idxD != idx) { edgeFactor += 0.25; if (idxD > 0) { neighborBlend += LookupColor(idxD); nCount++; } }
                 if (nCount > 0) neighborBlend /= (float)nCount;
 
-                // ── Terrain base (use terrainUV for parallax-shifted sampling) ──
-                float3 terrain = float3(0.5, 0.5, 0.5);
-                if (_HasTerrain > 0.5)
-                    terrain = SAMPLE_TEXTURE2D(_TerrainTex, sampler_TerrainTex, terrainUV).rgb;
-
                 // ── Heightmap with 3×3 Sobel normals ──
                 float height = 0.0;
                 float relief = 0.0;
@@ -291,7 +286,7 @@ Shader "WarStrategy/MapShader"
                         // Multi-step parallax (4 iterations for smooth depth)
                         float2 pDir = float2(-0.4, 0.25) * hpx * 3.0 * pomFade;
                         float ph = height;
-                        for (int pi = 0; pi < 4; pi++)
+                        [unroll] for (int pi = 0; pi < 4; pi++)
                         {
                             terrainUV -= pDir * ph;
                             ph = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, terrainUV, 0).r;
@@ -321,7 +316,7 @@ Shader "WarStrategy/MapShader"
                         float2 sunUV = normalize(float2(-0.5, 0.3)) * hpx * 2.5;
                         float currentH = height;
                         selfShadow = 1.0;
-                        for (int si = 1; si <= 8; si++)
+                        [unroll] for (int si = 1; si <= 8; si++)
                         {
                             float sH = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex,
                                 terrainUV + sunUV * (float)si, 0).r;
@@ -331,6 +326,11 @@ Shader "WarStrategy/MapShader"
                         selfShadow = lerp(1.0, selfShadow, 0.55 * shadowFade);
                     }
                 }
+
+                // ── Terrain base (AFTER heightmap so terrainUV is parallax-shifted) ──
+                float3 terrain = float3(0.5, 0.5, 0.5);
+                if (_HasTerrain > 0.5)
+                    terrain = SAMPLE_TEXTURE2D(_TerrainTex, sampler_TerrainTex, terrainUV).rgb;
 
                 float3 col;
 
