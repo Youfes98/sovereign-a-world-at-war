@@ -110,52 +110,48 @@
         </ui:VisualElement>
 
         <!-- ═══════════════════════════════════════════ -->
-        <!-- LEFT NAV PANEL                              -->
+        <!-- LEFT NAV PANEL — text labels, no emoji      -->
         <!-- ═══════════════════════════════════════════ -->
         <ui:VisualElement name="left-panel"
             picking-mode="Position"
-            style="position: absolute; left: 8px; top: 56px;
+            style="position: absolute; left: 0; top: 52px;
                    flex-direction: column;
-                   background-color: rgba(20, 26, 34, 0.90);
-                   border-radius: 6px;
-                   border-width: 1px; border-color: rgba(255,255,255,0.05);
-                   padding: 6px; width: 52px;">
+                   background-color: rgba(16, 22, 30, 0.92);
+                   border-right-width: 1px; border-right-color: rgba(255,255,255,0.06);
+                   border-bottom-right-radius: 6px;
+                   padding: 8px 0; width: 80px;">
 
-            <ui:Button name="btn-diplomacy" class="nav-btn"
-                style="width: 40px; height: 40px;
-                       background-color: rgba(255,255,255,0.04);
-                       border-width: 1px; border-color: rgba(255,255,255,0.06);
-                       border-radius: 6px; margin-bottom: 4px;
-                       -unity-text-align: middle-center;">
-                <ui:Label text="&#x1F310;" style="font-size: 18px;" />
-            </ui:Button>
+            <ui:Button name="btn-diplomacy" text="DPL"
+                style="height: 44px; margin: 0 8px 2px 8px;
+                       background-color: rgba(255,255,255,0.03);
+                       border-width: 0; border-radius: 4px;
+                       color: #778899; font-size: 10px; -unity-font-style: bold;
+                       letter-spacing: 1px;
+                       -unity-text-align: middle-center;" />
 
-            <ui:Button name="btn-research" class="nav-btn"
-                style="width: 40px; height: 40px;
-                       background-color: rgba(255,255,255,0.04);
-                       border-width: 1px; border-color: rgba(255,255,255,0.06);
-                       border-radius: 6px; margin-bottom: 4px;
-                       -unity-text-align: middle-center;">
-                <ui:Label text="&#x1F52C;" style="font-size: 18px;" />
-            </ui:Button>
+            <ui:Button name="btn-research" text="RES"
+                style="height: 44px; margin: 0 8px 2px 8px;
+                       background-color: rgba(255,255,255,0.03);
+                       border-width: 0; border-radius: 4px;
+                       color: #778899; font-size: 10px; -unity-font-style: bold;
+                       letter-spacing: 1px;
+                       -unity-text-align: middle-center;" />
 
-            <ui:Button name="btn-production" class="nav-btn"
-                style="width: 40px; height: 40px;
-                       background-color: rgba(255,255,255,0.04);
-                       border-width: 1px; border-color: rgba(255,255,255,0.06);
-                       border-radius: 6px; margin-bottom: 4px;
-                       -unity-text-align: middle-center;">
-                <ui:Label text="&#x2692;" style="font-size: 18px;" />
-            </ui:Button>
+            <ui:Button name="btn-production" text="PRD"
+                style="height: 44px; margin: 0 8px 2px 8px;
+                       background-color: rgba(255,255,255,0.03);
+                       border-width: 0; border-radius: 4px;
+                       color: #778899; font-size: 10px; -unity-font-style: bold;
+                       letter-spacing: 1px;
+                       -unity-text-align: middle-center;" />
 
-            <ui:Button name="btn-espionage" class="nav-btn"
-                style="width: 40px; height: 40px;
-                       background-color: rgba(255,255,255,0.04);
-                       border-width: 1px; border-color: rgba(255,255,255,0.06);
-                       border-radius: 6px;
-                       -unity-text-align: middle-center;">
-                <ui:Label text="&#x1F441;" style="font-size: 18px;" />
-            </ui:Button>
+            <ui:Button name="btn-espionage" text="INT"
+                style="height: 44px; margin: 0 8px 0 8px;
+                       background-color: rgba(255,255,255,0.03);
+                       border-width: 0; border-radius: 4px;
+                       color: #778899; font-size: 10px; -unity-font-style: bold;
+                       letter-spacing: 1px;
+                       -unity-text-align: middle-center;" />
         </ui:VisualElement>
 
         <!-- ═══════════════════════════════════════════ -->

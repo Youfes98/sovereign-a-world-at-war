@@ -7,197 +7,185 @@
 
         <!-- Top Bar -->
         <ui:VisualElement name="top-bar"
-            style="flex-direction: row; height: 48px;
-                   background-color: rgba(11, 20, 38, 0.92);
-                   border-bottom-width: 1px; border-color: rgba(30, 48, 80, 0.4);
+            style="flex-direction: row; height: 44px;
+                   background-color: #141A22;
+                   border-bottom-width: 1px; border-bottom-color: rgba(80, 100, 130, 0.2);
                    align-items: center; padding-left: 20px; padding-right: 20px;
                    justify-content: space-between;">
 
             <ui:Button name="back-btn" text="ESC  BACK"
-                style="height: 32px; padding-left: 14px; padding-right: 14px;
+                style="height: 28px; padding-left: 12px; padding-right: 12px;
                        background-color: rgba(0,0,0,0);
-                       color: #8899AA; font-size: 12px;
-                       border-width: 1px; border-color: rgba(30, 48, 80, 0.4); border-radius: 3px;
-                       transition-property: border-color, color;
-                       transition-duration: 0.15s;" />
+                       color: #667788; font-size: 11px;
+                       border-width: 1px; border-color: rgba(255,255,255,0.08); border-radius: 3px;" />
 
             <ui:Label text="SELECT YOUR NATION"
                 style="-unity-text-align: middle-center;
-                       font-size: 13px; color: rgba(212, 168, 67, 0.7);
-                       letter-spacing: 4px;" />
+                       font-size: 12px; color: rgba(214, 179, 106, 0.6);
+                       letter-spacing: 5px; -unity-font-style: bold;" />
 
             <ui:VisualElement style="width: 90px;" />
         </ui:VisualElement>
 
-        <!-- Map area -->
+        <!-- Map area fills remaining space -->
         <ui:VisualElement style="flex-grow: 1;" picking-mode="Ignore" />
 
-        <!-- Premium Country Card -->
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- COUNTRY INFO CARD (slides in from right)   -->
+        <!-- ═══════════════════════════════════════════ -->
         <ui:VisualElement name="country-card"
             picking-mode="Position"
             style="position: absolute;
-                   right: 28px; top: 68px;
-                   width: 280px;
-                   background-color: rgba(8, 15, 30, 0.94);
-                   border-width: 1px;
-                   border-top-color: rgba(100, 120, 160, 0.25);
-                   border-left-color: rgba(100, 120, 160, 0.15);
-                   border-bottom-color: rgba(20, 30, 50, 0.6);
-                   border-right-color: rgba(20, 30, 50, 0.4);
-                   border-radius: 6px;
+                   right: 20px; top: 56px; bottom: 20px;
+                   width: 300px;
+                   background-color: rgba(16, 22, 30, 0.95);
+                   border-width: 1px; border-color: rgba(255,255,255,0.06);
+                   border-radius: 8px;
                    display: none;
-                   translate: 300px 0;
+                   translate: 320px 0;
                    opacity: 0;
                    transition-property: translate, opacity;
-                   transition-duration: 0.4s, 0.3s;
+                   transition-duration: 0.35s, 0.25s;
                    transition-timing-function: ease-out-cubic;
-                   overflow: hidden;">
+                   overflow: hidden;
+                   flex-direction: column;">
 
-            <!-- Flag Banner (top, full width, cropped) -->
+            <!-- Flag (full width banner, cropped) -->
             <ui:VisualElement name="flag-image"
-                style="width: 280px; height: 90px;
-                       border-top-left-radius: 5px; border-top-right-radius: 5px;" />
+                style="width: 300px; height: 140px;
+                       border-top-left-radius: 7px; border-top-right-radius: 7px;
+                       background-size: cover; background-position: center;" />
 
-            <!-- Gradient overlay on flag bottom -->
-            <ui:VisualElement style="position: absolute; top: 55px; left: 0; right: 0; height: 40px;
-                                     background-color: rgba(8, 15, 30, 0.0);" />
+            <!-- Gradient fade over flag bottom -->
+            <ui:VisualElement style="position: absolute; top: 100px; left: 0; right: 0; height: 44px;
+                background: linear-gradient(rgba(16, 22, 30, 0), rgba(16, 22, 30, 0.95));" />
 
-            <!-- Content area -->
-            <ui:VisualElement style="padding-left: 16px; padding-right: 16px;
-                                     padding-top: 12px; padding-bottom: 16px;">
+            <!-- Content -->
+            <ui:VisualElement style="padding: 16px 20px; flex-grow: 1; flex-direction: column;">
 
-                <!-- Country Name -->
+                <!-- Name -->
                 <ui:Label name="country-name" text=""
-                    style="font-size: 20px; color: #E8E8E8; -unity-font-style: bold;
-                           margin-bottom: 1px; letter-spacing: 0.5px;" />
+                    style="font-size: 22px; color: #F0EDE5; -unity-font-style: bold;
+                           margin-bottom: 4px;" />
 
-                <!-- Government + Region row -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 2px;">
-                    <ui:Label name="govt-type" text=""
-                        style="font-size: 11px; color: rgba(136, 153, 170, 0.8); -unity-font-style: italic;" />
-                </ui:VisualElement>
+                <!-- Government -->
+                <ui:Label name="govt-type" text=""
+                    style="font-size: 11px; color: #778899; -unity-font-style: italic;
+                           margin-bottom: 2px;" />
 
+                <!-- Region -->
                 <ui:Label name="region-label" text=""
-                    style="font-size: 10px; color: rgba(85, 102, 119, 0.8);
-                           margin-bottom: 14px;" />
+                    style="font-size: 10px; color: #556677; margin-bottom: 18px;" />
 
-                <!-- Thin separator -->
-                <ui:VisualElement style="height: 1px;
-                    background-color: rgba(60, 80, 120, 0.2);
-                    margin-bottom: 14px;" />
+                <!-- Stats Section -->
+                <ui:VisualElement style="margin-bottom: 16px;">
 
-                <!-- GDP -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 9px;">
-                    <ui:Label text="GDP" style="width: 65px; font-size: 10px; color: rgba(136, 153, 170, 0.7);
-                              letter-spacing: 1px;" />
-                    <ui:VisualElement style="flex-grow: 1; height: 3px;
-                        background-color: rgba(255, 255, 255, 0.06); border-radius: 2px;
-                        margin-right: 8px; overflow: hidden;">
-                        <ui:VisualElement name="gdp-bar"
-                            style="height: 100%; width: 0%;
-                                   background-color: rgba(212, 168, 67, 0.85); border-radius: 2px;
-                                   transition-property: width;
-                                   transition-duration: 0.6s;
-                                   transition-timing-function: ease-out-cubic;
-                                   transition-delay: 0.2s;" />
+                    <!-- GDP -->
+                    <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 12px;">
+                        <ui:Label text="GDP" style="width: 44px; font-size: 10px; color: #556677;
+                                  letter-spacing: 1px; -unity-font-style: bold;" />
+                        <ui:VisualElement style="flex-grow: 1; height: 4px;
+                            background-color: rgba(255, 255, 255, 0.06); border-radius: 2px;
+                            margin-right: 10px; overflow: hidden;">
+                            <ui:VisualElement name="gdp-bar"
+                                style="height: 100%; width: 0%;
+                                       background-color: #D6B36A; border-radius: 2px;
+                                       transition-property: width;
+                                       transition-duration: 0.6s;
+                                       transition-timing-function: ease-out-cubic;
+                                       transition-delay: 0.15s;" />
+                        </ui:VisualElement>
+                        <ui:Label name="gdp-value" text=""
+                            style="min-width: 52px; font-size: 12px; color: #D6B36A;
+                                   -unity-text-align: middle-right; -unity-font-style: bold;" />
                     </ui:VisualElement>
-                    <ui:Label name="gdp-value" text=""
-                        style="width: 50px; font-size: 11px; color: rgba(232, 232, 232, 0.9);
-                               -unity-text-align: middle-right;" />
+
+                    <!-- Population -->
+                    <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 12px;">
+                        <ui:Label text="POP" style="width: 44px; font-size: 10px; color: #556677;
+                                  letter-spacing: 1px; -unity-font-style: bold;" />
+                        <ui:VisualElement style="flex-grow: 1; height: 4px;
+                            background-color: rgba(255, 255, 255, 0.06); border-radius: 2px;
+                            margin-right: 10px; overflow: hidden;">
+                            <ui:VisualElement name="pop-bar"
+                                style="height: 100%; width: 0%;
+                                       background-color: #5B9BD5; border-radius: 2px;
+                                       transition-property: width;
+                                       transition-duration: 0.6s;
+                                       transition-timing-function: ease-out-cubic;
+                                       transition-delay: 0.22s;" />
+                        </ui:VisualElement>
+                        <ui:Label name="pop-value" text=""
+                            style="min-width: 52px; font-size: 12px; color: #CCCCCC;
+                                   -unity-text-align: middle-right; -unity-font-style: bold;" />
+                    </ui:VisualElement>
+
+                    <!-- Military -->
+                    <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 12px;">
+                        <ui:Label text="MIL" style="width: 44px; font-size: 10px; color: #556677;
+                                  letter-spacing: 1px; -unity-font-style: bold;" />
+                        <ui:VisualElement style="flex-grow: 1; height: 4px;
+                            background-color: rgba(255, 255, 255, 0.06); border-radius: 2px;
+                            margin-right: 10px; overflow: hidden;">
+                            <ui:VisualElement name="mil-bar"
+                                style="height: 100%; width: 0%;
+                                       background-color: #C0544E; border-radius: 2px;
+                                       transition-property: width;
+                                       transition-duration: 0.6s;
+                                       transition-timing-function: ease-out-cubic;
+                                       transition-delay: 0.29s;" />
+                        </ui:VisualElement>
+                        <ui:Label name="mil-value" text=""
+                            style="min-width: 52px; font-size: 12px; color: #CCCCCC;
+                                   -unity-text-align: middle-right; -unity-font-style: bold;" />
+                    </ui:VisualElement>
+
+                    <!-- Stability -->
+                    <ui:VisualElement style="flex-direction: row; align-items: center;">
+                        <ui:Label text="STAB" style="width: 44px; font-size: 10px; color: #556677;
+                                  letter-spacing: 1px; -unity-font-style: bold;" />
+                        <ui:VisualElement style="flex-grow: 1; height: 4px;
+                            background-color: rgba(255, 255, 255, 0.06); border-radius: 2px;
+                            margin-right: 10px; overflow: hidden;">
+                            <ui:VisualElement name="stability-bar"
+                                style="height: 100%; width: 0%;
+                                       background-color: #4CAF50; border-radius: 2px;
+                                       transition-property: width;
+                                       transition-duration: 0.6s;
+                                       transition-timing-function: ease-out-cubic;
+                                       transition-delay: 0.36s;" />
+                        </ui:VisualElement>
+                        <ui:Label name="stability-value" text=""
+                            style="min-width: 52px; font-size: 12px; color: #CCCCCC;
+                                   -unity-text-align: middle-right; -unity-font-style: bold;" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
-                <!-- Population -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 9px;">
-                    <ui:Label text="POP" style="width: 65px; font-size: 10px; color: rgba(136, 153, 170, 0.7);
-                              letter-spacing: 1px;" />
-                    <ui:VisualElement style="flex-grow: 1; height: 3px;
-                        background-color: rgba(255, 255, 255, 0.06); border-radius: 2px;
-                        margin-right: 8px; overflow: hidden;">
-                        <ui:VisualElement name="pop-bar"
-                            style="height: 100%; width: 0%;
-                                   background-color: rgba(74, 158, 235, 0.8); border-radius: 2px;
-                                   transition-property: width;
-                                   transition-duration: 0.6s;
-                                   transition-timing-function: ease-out-cubic;
-                                   transition-delay: 0.28s;" />
-                    </ui:VisualElement>
-                    <ui:Label name="pop-value" text=""
-                        style="width: 50px; font-size: 11px; color: rgba(232, 232, 232, 0.9);
-                               -unity-text-align: middle-right;" />
-                </ui:VisualElement>
+                <!-- Spacer -->
+                <ui:VisualElement style="flex-grow: 1;" />
 
-                <!-- Military -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 9px;">
-                    <ui:Label text="MIL" style="width: 65px; font-size: 10px; color: rgba(136, 153, 170, 0.7);
-                              letter-spacing: 1px;" />
-                    <ui:VisualElement style="flex-grow: 1; height: 3px;
-                        background-color: rgba(255, 255, 255, 0.06); border-radius: 2px;
-                        margin-right: 8px; overflow: hidden;">
-                        <ui:VisualElement name="mil-bar"
-                            style="height: 100%; width: 0%;
-                                   background-color: rgba(192, 57, 43, 0.8); border-radius: 2px;
-                                   transition-property: width;
-                                   transition-duration: 0.6s;
-                                   transition-timing-function: ease-out-cubic;
-                                   transition-delay: 0.36s;" />
-                    </ui:VisualElement>
-                    <ui:Label name="mil-value" text=""
-                        style="width: 50px; font-size: 11px; color: rgba(232, 232, 232, 0.9);
-                               -unity-text-align: middle-right;" />
-                </ui:VisualElement>
-
-                <!-- Stability -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-bottom: 14px;">
-                    <ui:Label text="STAB" style="width: 65px; font-size: 10px; color: rgba(136, 153, 170, 0.7);
-                              letter-spacing: 1px;" />
-                    <ui:VisualElement style="flex-grow: 1; height: 3px;
-                        background-color: rgba(255, 255, 255, 0.06); border-radius: 2px;
-                        margin-right: 8px; overflow: hidden;">
-                        <ui:VisualElement name="stability-bar"
-                            style="height: 100%; width: 0%;
-                                   background-color: rgba(39, 174, 96, 0.8); border-radius: 2px;
-                                   transition-property: width;
-                                   transition-duration: 0.6s;
-                                   transition-timing-function: ease-out-cubic;
-                                   transition-delay: 0.44s;" />
-                    </ui:VisualElement>
-                    <ui:Label name="stability-value" text=""
-                        style="width: 50px; font-size: 11px; color: rgba(232, 232, 232, 0.9);
-                               -unity-text-align: middle-right;" />
-                </ui:VisualElement>
-
-                <!-- Separator -->
-                <ui:VisualElement style="height: 1px;
-                    background-color: rgba(60, 80, 120, 0.2);
-                    margin-bottom: 12px;" />
-
-                <!-- Tier + Difficulty -->
+                <!-- Tier + Difficulty (centered) -->
                 <ui:VisualElement style="flex-direction: row; align-items: center;
-                                         justify-content: center; margin-bottom: 14px;">
+                                         justify-content: center; margin-bottom: 16px;">
                     <ui:Label name="tier-badge" text=""
-                        style="padding-top: 2px; padding-bottom: 2px;
-                               padding-left: 10px; padding-right: 10px;
+                        style="padding: 3px 12px;
                                border-radius: 3px;
-                               background-color: #4A9EEB; color: white;
                                font-size: 11px; -unity-font-style: bold;
-                               margin-right: 10px;
-                               letter-spacing: 1px;" />
+                               letter-spacing: 1px;
+                               margin-right: 10px;" />
                     <ui:Label name="difficulty-label" text=""
-                        style="font-size: 12px; color: #F39C12;" />
+                        style="font-size: 12px;" />
                 </ui:VisualElement>
 
                 <!-- Play Button -->
-                <ui:Button name="play-btn" text="PLAY AS COUNTRY"
-                    style="height: 38px;
-                           background-color: rgba(212, 168, 67, 0.9);
-                           color: rgba(11, 20, 38, 0.95);
+                <ui:Button name="play-btn" text=""
+                    style="height: 42px;
+                           background-color: #D6B36A;
+                           color: #0F1419;
                            -unity-font-style: bold; font-size: 13px;
-                           border-width: 0; border-radius: 4px;
+                           border-width: 0; border-radius: 6px;
                            -unity-text-align: middle-center;
-                           letter-spacing: 1px;
-                           transition-property: background-color, scale;
-                           transition-duration: 0.15s;
-                           transition-timing-function: ease-out;" />
+                           letter-spacing: 2px;" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
