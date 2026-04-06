@@ -35,7 +35,7 @@
                 <!-- Treasury -->
                 <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 16px; margin-right: 16px;">
                     <ui:VisualElement name="icon-treasury"
-                        style="width: 22px; height: 22px; margin-right: 6px;" />
+                        style="width: 22px; height: 22px; margin-right: 6px; -unity-background-scale-mode: scale-to-fit;" />
                     <ui:Label name="gdp-value" text=""
                         style="font-size: 15px; color: #D4A843; -unity-font-style: bold;" />
                 </ui:VisualElement>
@@ -45,7 +45,7 @@
                 <!-- Manpower -->
                 <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 16px; margin-right: 16px;">
                     <ui:VisualElement name="icon-manpower"
-                        style="width: 22px; height: 22px; margin-right: 6px;" />
+                        style="width: 22px; height: 22px; margin-right: 6px; -unity-background-scale-mode: scale-to-fit;" />
                     <ui:Label name="manpower-value" text=""
                         style="font-size: 15px; color: #E8E8E8; -unity-font-style: bold;" />
                 </ui:VisualElement>
@@ -55,7 +55,7 @@
                 <!-- Balance -->
                 <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 16px; margin-right: 16px;">
                     <ui:VisualElement name="icon-energy"
-                        style="width: 22px; height: 22px; margin-right: 6px;" />
+                        style="width: 22px; height: 22px; margin-right: 6px; -unity-background-scale-mode: scale-to-fit;" />
                     <ui:Label name="balance-value" text=""
                         style="font-size: 15px; color: #4CAF50; -unity-font-style: bold;" />
                 </ui:VisualElement>
@@ -65,7 +65,7 @@
                 <!-- Military -->
                 <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 16px; margin-right: 16px;">
                     <ui:VisualElement name="icon-military"
-                        style="width: 22px; height: 22px; margin-right: 6px;" />
+                        style="width: 22px; height: 22px; margin-right: 6px; -unity-background-scale-mode: scale-to-fit;" />
                     <ui:Label name="military-value" text=""
                         style="font-size: 15px; color: #E8E8E8; -unity-font-style: bold;" />
                 </ui:VisualElement>
@@ -75,7 +75,7 @@
                 <!-- Stability -->
                 <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 16px; margin-right: 16px;">
                     <ui:VisualElement name="icon-stability"
-                        style="width: 22px; height: 22px; margin-right: 6px;" />
+                        style="width: 22px; height: 22px; margin-right: 6px; -unity-background-scale-mode: scale-to-fit;" />
                     <ui:Label name="stability-value" text=""
                         style="font-size: 15px; color: #E8E8E8; -unity-font-style: bold;" />
                 </ui:VisualElement>

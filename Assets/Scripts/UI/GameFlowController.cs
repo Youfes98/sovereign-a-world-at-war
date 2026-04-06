@@ -409,28 +409,32 @@ namespace WarStrategy.UI
             if (dateLabel != null && Services.Clock != null)
                 dateLabel.text = Services.Clock.GetDateString();
 
-            // Load resource icons via C# (try Texture2D first, then Sprite)
+            // Load resource icons via C# (Texture2D — icons use textureType: Default)
+            // NOTE: UXML element names use hyphens (icon-treasury), so query with hyphens.
             string[] iconNames = { "icon_treasury", "icon_manpower", "icon_energy", "icon_military", "icon_stability" };
             foreach (var iconName in iconNames)
             {
-                var iconEl = _gameplayHudPanel.Q(iconName);
-                if (iconEl == null) continue;
+                // UXML uses hyphens in element names, C# asset names use underscores
+                string elementName = iconName.Replace('_', '-');
+                var iconEl = _gameplayHudPanel.Q(elementName);
+                if (iconEl == null)
+                {
+                    Debug.LogWarning($"[GameFlow] Icon element not found in UXML: '{elementName}'");
+                    continue;
+                }
 
-                // Try loading as Texture2D first
                 var tex = Resources.Load<Texture2D>($"UI/Icons/{iconName}");
                 if (tex != null)
                 {
                     iconEl.style.backgroundImage = new StyleBackground(tex);
-                    continue;
+                    // Ensure the icon scales properly within the element
+                    iconEl.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
+                    Debug.Log($"[GameFlow] Loaded icon: {iconName} ({tex.width}x{tex.height})");
                 }
-                // Fallback: try loading as Sprite
-                var sprite = Resources.Load<Sprite>($"UI/Icons/{iconName}");
-                if (sprite != null)
-                    iconEl.style.backgroundImage = new StyleBackground(sprite);
-#if UNITY_EDITOR
                 else
-                    Debug.LogWarning($"[GameFlow] Icon not found: UI/Icons/{iconName}");
-#endif
+                {
+                    Debug.LogWarning($"[GameFlow] Icon texture not found: UI/Icons/{iconName}");
+                }
             }
 
             // Populate resource values
