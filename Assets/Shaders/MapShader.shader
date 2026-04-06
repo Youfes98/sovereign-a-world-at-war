@@ -26,11 +26,11 @@ Shader "WarStrategy/MapShader"
         _NoiseStr ("Noise Strength", Float) = 0.012
         _DetailStrength ("Detail Strength", Float) = 0.02
         _BiomeDetailStrength ("Biome Detail", Float) = 0.15
-        _CoastGlowStr ("Coast Glow", Float) = 0.35
+        _CoastGlowStr ("Coast Glow", Float) = 0.22
 
         _OceanDeep ("Ocean Deep", Color) = (0.08, 0.16, 0.28, 1)
         _OceanMid ("Ocean Mid", Color) = (0.14, 0.28, 0.40, 1)
-        _OceanShallow ("Ocean Shallow", Color) = (0.22, 0.42, 0.50, 1)
+        _OceanShallow ("Ocean Shallow", Color) = (0.28, 0.40, 0.46, 1)
         _PaperTint ("Paper Tint", Color) = (1.0, 0.96, 0.88, 1)
         _PaperStrength ("Paper Strength", Float) = 0.18
 
@@ -333,11 +333,11 @@ Shader "WarStrategy/MapShader"
                     // Coastal depth gradient — shallow water near land
                     float coastGradient = saturate(1.0 - coastDist * 3.0);
                     coastGradient = coastGradient * coastGradient; // quadratic — natural transition
-                    float3 shallowWater = float3(0.42, 0.58, 0.55);
+                    float3 shallowWater = float3(0.30, 0.45, 0.48);
                     col = lerp(col, shallowWater, coastGradient * 0.4);
 
                     // Warm coast glow with slight color shift
-                    float3 coastColor = lerp(_OceanShallow.rgb, float3(0.38, 0.52, 0.56), 0.3);
+                    float3 coastColor = lerp(_OceanShallow.rgb, float3(0.30, 0.42, 0.48), 0.3);
                     col = lerp(col, coastColor, coastDist * _CoastGlowStr * 2.0);
 
                     // Procedural coastal foam
@@ -345,7 +345,7 @@ Shader "WarStrategy/MapShader"
                     float foamLine = smoothstep(0.02, 0.12, coastDist) * (1.0 - smoothstep(0.12, 0.25, coastDist));
                     float foamFade = saturate((_ZoomLevel - 1.5) / 3.0);
                     float foam = foamLine * smoothstep(0.4, 0.7, foamNoise) * 0.35 * foamFade;
-                    col = lerp(col, float3(0.85, 0.9, 0.92), foam);
+                    col = lerp(col, float3(0.72, 0.78, 0.80), foam);
 
                     // Noise for ocean texture
                     if (_HasNoise > 0.5)
@@ -372,7 +372,10 @@ Shader "WarStrategy/MapShader"
                         float3 biomeCol = BiomeColor(tt, height, uv);
                         // Boost terrain saturation before blending
                         float tLum = Lum(terrain);
-                        float3 terrSat = lerp(float3(tLum,tLum,tLum), terrain, 1.8); // +80% saturation for rich warm tones
+                        float3 terrSat = lerp(float3(tLum,tLum,tLum), terrain, 1.8);
+                        // Extra warmth push for sandy/desert terrain (where R > G > B)
+                        float warmness = saturate((terrSat.r - terrSat.b) * 2.0);
+                        terrSat *= lerp(float3(1,1,1), float3(1.08, 1.0, 0.88), warmness);
                         biomeBase = terrSat * 0.6 + biomeCol * 0.4;
                     }
                     else if (_HasTerrainTypes > 0.5)
