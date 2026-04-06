@@ -24,8 +24,8 @@ Shader "WarStrategy/MapShader"
         _TerrainDesat ("Terrain Desat", Range(0,1)) = 0.10
         _ElevationStrength ("Elevation Relief", Float) = 12.0
         _NoiseStr ("Noise Strength", Float) = 0.012
-        _DetailStrength ("Detail Strength", Float) = 0.02
-        _BiomeDetailStrength ("Biome Detail", Float) = 0.15
+        _DetailStrength ("Detail Strength", Float) = 0.08
+        _BiomeDetailStrength ("Biome Detail", Float) = 0.30
         _CoastGlowStr ("Coast Glow", Float) = 0.22
 
         _OceanDeep ("Ocean Deep", Color) = (0.08, 0.16, 0.28, 1)
@@ -294,31 +294,53 @@ Shader "WarStrategy/MapShader"
                 if (idx == 0)
                 {
                     // ════════════════════════════════════════
-                    // OCEAN — animated depth rendering
+                    // OCEAN — realistic depth with visible seafloor
                     // ════════════════════════════════════════
 
                     float depth = 1.0 - height;
-                    col = lerp(_OceanShallow.rgb, _OceanDeep.rgb, saturate(depth * 1.5));
 
-                    // Terrain-based continental shelf detail
+                    // Base water color gradient (shallow teal → deep navy)
+                    float3 deepCol = _OceanDeep.rgb;
+                    float3 midCol  = _OceanMid.rgb;
+                    float3 shallowCol = _OceanShallow.rgb;
+                    float depthT = saturate(depth * 1.5);
+                    col = lerp(shallowCol, lerp(midCol, deepCol, saturate((depthT - 0.4) / 0.6)), depthT);
+
+                    // Visible seafloor: blend terrain texture through water based on depth
+                    // Shallow = see seafloor clearly, Deep = only water color
                     if (_HasTerrain > 0.5)
                     {
-                        float terrLum = Lum(terrain);
-                        col = lerp(col, _OceanMid.rgb, terrLum * 0.25);
+                        float3 seafloor = terrain * float3(0.6, 0.75, 0.72); // tinted by water color
+                        float seafloorVisibility = (1.0 - smoothstep(0.0, 0.5, depthT)) * 0.45;
+                        col = lerp(col, seafloor, seafloorVisibility);
                     }
 
-                    // Underwater relief
-                    col *= clamp(1.0 + relief * 0.15, 0.9, 1.1);
+                    // Underwater relief from heightmap
+                    if (_HasHeightmap > 0.5)
+                    {
+                        float3 uwNormal = normalize(float3(-dx * 8.0, -dy * 8.0, 1.0));
+                        float3 uwSun = normalize(float3(-0.4, 0.3, 0.8));
+                        float uwDiffuse = max(dot(uwNormal, uwSun), 0.0);
+                        float uwLighting = 0.85 + 0.15 * uwDiffuse;
+                        col *= lerp(1.0, uwLighting, (1.0 - depthT) * 0.6);
+                    }
 
-                    // Animated ocean waves (smooth value noise, reduced frequency)
+                    // Multi-scale wave animation
                     float t = _Time.y * 0.08;
-                    float wave1 = smoothNoise(uv * 30.0 + float2(t, t * 0.7));
-                    float wave2 = smoothNoise(uv * 50.0 + float2(-t * 0.6, t * 0.4));
-                    float wavePattern = (wave1 + wave2) * 0.5;
-                    float waveStr = lerp(0.008, 0.018, saturate(1.0 - depth));
+                    float wave1 = smoothNoise(uv * 25.0 + float2(t, t * 0.7));
+                    float wave2 = smoothNoise(uv * 60.0 + float2(-t * 0.6, t * 0.4));
+                    float wave3 = smoothNoise(uv * 120.0 + float2(t * 0.3, -t * 0.5));
+                    float wavePattern = wave1 * 0.5 + wave2 * 0.3 + wave3 * 0.2;
+                    float waveStr = lerp(0.012, 0.025, saturate(1.0 - depthT));
                     col += (wavePattern - 0.5) * waveStr;
 
-                    // Coast glow — 3×3 neighbor check (8 samples instead of 24)
+                    // Specular highlight (sun reflection on water surface)
+                    float specWave = smoothNoise(uv * 80.0 + float2(t * 0.5, t * 0.3));
+                    float specular = pow(saturate(specWave * 1.2 - 0.1), 8.0) * 0.08;
+                    specular *= (1.0 - depthT * 0.5); // stronger in shallow water
+                    col += float3(specular, specular, specular * 0.9);
+
+                    // Coast proximity detection (8 neighbors)
                     float coastDist = 0.0;
                     if (RGBToIndex(SampleProv(uv + float2(-px.x, -px.y))) > 0) coastDist += 0.7;
                     if (RGBToIndex(SampleProv(uv + float2(    0, -px.y))) > 0) coastDist += 1.0;
@@ -330,26 +352,21 @@ Shader "WarStrategy/MapShader"
                     if (RGBToIndex(SampleProv(uv + float2( px.x,  px.y))) > 0) coastDist += 0.7;
                     coastDist = saturate(coastDist * 0.12);
 
-                    // Coastal depth gradient — shallow water near land
+                    // Coastal shallow gradient with realistic teal tint
                     float coastGradient = saturate(1.0 - coastDist * 3.0);
-                    coastGradient = coastGradient * coastGradient; // quadratic — natural transition
-                    float3 shallowWater = float3(0.30, 0.45, 0.48);
-                    col = lerp(col, shallowWater, coastGradient * 0.4);
+                    coastGradient = coastGradient * coastGradient;
+                    float3 nearShore = float3(0.18, 0.48, 0.52); // realistic teal near shore
+                    col = lerp(col, nearShore, coastGradient * 0.35);
 
-                    // Warm coast glow with slight color shift
-                    float3 coastColor = lerp(_OceanShallow.rgb, float3(0.30, 0.42, 0.48), 0.3);
-                    col = lerp(col, coastColor, coastDist * _CoastGlowStr * 2.0);
+                    // Subtle coast brightening (not glow)
+                    col = lerp(col, col * 1.15, coastDist * _CoastGlowStr);
 
-                    // Procedural coastal foam
+                    // Coastal foam — natural white-water
                     float foamNoise = smoothNoise(uv * 40.0 + _Time.y * 0.1);
-                    float foamLine = smoothstep(0.02, 0.12, coastDist) * (1.0 - smoothstep(0.12, 0.25, coastDist));
+                    float foamLine = smoothstep(0.02, 0.10, coastDist) * (1.0 - smoothstep(0.10, 0.20, coastDist));
                     float foamFade = saturate((_ZoomLevel - 1.5) / 3.0);
-                    float foam = foamLine * smoothstep(0.4, 0.7, foamNoise) * 0.35 * foamFade;
-                    col = lerp(col, float3(0.72, 0.78, 0.80), foam);
-
-                    // Noise for ocean texture
-                    if (_HasNoise > 0.5)
-                        col += (SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, uv * 2.0).r - 0.5) * _NoiseStr * 0.3;
+                    float foam = foamLine * smoothstep(0.45, 0.7, foamNoise) * 0.25 * foamFade;
+                    col = lerp(col, float3(0.75, 0.82, 0.85), foam);
                 }
                 else
                 {
@@ -396,24 +413,52 @@ Shader "WarStrategy/MapShader"
 
                     col = tinted;
 
-                    // Step 3: Biome detail
+                    // Step 3: Multi-scale biome detail (more detail as you zoom IN)
                     if (_HasTerrainTypes > 0.5)
                     {
-                        float zf = saturate(1.0 - px.x * 2048.0);
-                        if (zf > 0.01)
+                        float tt = SAMPLE_TEXTURE2D(_TerrainTypeTex, sampler_TerrainTypeTex, uv).r * 255.0;
+                        int bi = clamp((int)(tt + 0.5), 0, 5);
+                        float ac = (float)(bi % 3);
+                        float ar = (float)(bi / 3);
+
+                        // Scale 1: broad biome pattern (always visible)
+                        float2 buv = float2((ac + frac(uv.x * 8.0)) / 3.0, (ar + frac(uv.y * 8.0)) / 2.0);
+                        float3 bc = SAMPLE_TEXTURE2D(_BiomeAtlas, sampler_BiomeAtlas, buv).rgb;
+                        float2 buv2 = float2((ac + frac(uv.x * 11.3 + smoothNoise(uv * 3.0) * 0.1)) / 3.0,
+                                              (ar + frac(uv.y * 11.3)) / 2.0);
+                        float3 bc2 = SAMPLE_TEXTURE2D(_BiomeAtlas, sampler_BiomeAtlas, buv2).rgb;
+                        bc = bc * 0.6 + bc2 * 0.4;
+                        col = lerp(col, col * bc, _BiomeDetailStrength * 0.6);
+
+                        // Scale 2: medium detail (visible when zoomed in past 3x)
+                        float midZoom = saturate((_ZoomLevel - 3.0) / 4.0);
+                        if (midZoom > 0.01)
                         {
-                            float tt = SAMPLE_TEXTURE2D(_TerrainTypeTex, sampler_TerrainTypeTex, uv).r * 255.0;
-                            int bi = clamp((int)(tt + 0.5), 0, 5);
-                            float ac = (float)(bi % 3);
-                            float ar = (float)(bi / 3);
-                            float2 buv = float2((ac + frac(uv.x * 12.0)) / 3.0, (ar + frac(uv.y * 12.0)) / 2.0);
-                            float3 bc = SAMPLE_TEXTURE2D(_BiomeAtlas, sampler_BiomeAtlas, buv).rgb;
-                            // Second rotated sample breaks visible tiling repetition
-                            float2 buv2 = float2((ac + frac(uv.x * 17.3 + smoothNoise(uv * 3.0) * 0.1)) / 3.0,
-                                                  (ar + frac(uv.y * 17.3)) / 2.0);
-                            float3 bc2 = SAMPLE_TEXTURE2D(_BiomeAtlas, sampler_BiomeAtlas, buv2).rgb;
-                            bc = bc * 0.6 + bc2 * 0.4;
-                            col = lerp(col, col * bc, _BiomeDetailStrength * zf);
+                            float2 buv3 = float2((ac + frac(uv.x * 24.0)) / 3.0, (ar + frac(uv.y * 24.0)) / 2.0);
+                            float3 bc3 = SAMPLE_TEXTURE2D(_BiomeAtlas, sampler_BiomeAtlas, buv3).rgb;
+                            col = lerp(col, col * bc3, _BiomeDetailStrength * 0.35 * midZoom);
+                        }
+
+                        // Scale 3: fine detail (visible when very zoomed in past 6x)
+                        float closeZoom = saturate((_ZoomLevel - 6.0) / 6.0);
+                        if (closeZoom > 0.01)
+                        {
+                            float2 buv4 = float2((ac + frac(uv.x * 48.0 + 0.37)) / 3.0, (ar + frac(uv.y * 48.0 + 0.71)) / 2.0);
+                            float3 bc4 = SAMPLE_TEXTURE2D(_BiomeAtlas, sampler_BiomeAtlas, buv4).rgb;
+                            col = lerp(col, col * bc4, _BiomeDetailStrength * 0.25 * closeZoom);
+                        }
+                    }
+
+                    // Brushstroke detail overlay (adds painterly texture at close zoom)
+                    if (_HasDetail > 0.5)
+                    {
+                        float detZoom = saturate((_ZoomLevel - 2.0) / 6.0);
+                        if (detZoom > 0.01)
+                        {
+                            float det1 = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, uv * 16.0).r;
+                            float det2 = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, uv * 40.0 + 0.5).r;
+                            float detMix = det1 * 0.6 + det2 * 0.4;
+                            col *= lerp(1.0, 0.85 + 0.30 * detMix, _DetailStrength * 3.0 * detZoom);
                         }
                     }
 
