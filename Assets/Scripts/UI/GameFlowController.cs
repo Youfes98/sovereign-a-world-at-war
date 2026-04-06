@@ -34,6 +34,7 @@ namespace WarStrategy.UI
         private MainMenuController _mainMenu;
         private CountrySelectionController _countrySelect;
         private TransitionController _transition;
+        private GameplayHUDController _gameplayHUD;
 
         // ── UXML templates (loaded from Resources/UI/) ──
         private VisualTreeAsset _mainMenuTemplate;
@@ -388,26 +389,17 @@ namespace WarStrategy.UI
 
         private void PopulateGameplayHUD(string iso)
         {
-            if (_gameplayHudPanel == null || Services.GameState == null) return;
-            if (!Services.GameState.Countries.TryGetValue(iso, out var country)) return;
+            if (_gameplayHudPanel == null) return;
 
-            // Player flag (circular)
-            var flagEl = _gameplayHudPanel.Q("player-flag");
-            if (flagEl != null)
+            // Initialize HUD controller if not yet created
+            if (_gameplayHUD == null)
             {
-                var flagTex = Resources.Load<Texture2D>($"Flags/{country.Iso2}");
-                if (flagTex != null)
-                    flagEl.style.backgroundImage = new StyleBackground(flagTex);
+                _gameplayHUD = new GameplayHUDController();
+                _gameplayHUD.Initialize(_gameplayHudPanel);
             }
 
-            // Player name
-            var nameLabel = _gameplayHudPanel.Q<Label>("player-name");
-            if (nameLabel != null) nameLabel.text = country.Name;
-
-            // Date
-            var dateLabel = _gameplayHudPanel.Q<Label>("game-date");
-            if (dateLabel != null && Services.Clock != null)
-                dateLabel.text = Services.Clock.GetDateString();
+            _gameplayHUD.SetPlayerCountry(iso);
+            _gameplayHUD.UpdateDate();
         }
 
         // ────────────────────────────────────────────

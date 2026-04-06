@@ -4,67 +4,260 @@
         style="position: absolute; left: 0; top: 0; right: 0; bottom: 0;"
         picking-mode="Ignore">
 
-        <!-- Top-left: Player country flag (circle) + name -->
-        <ui:VisualElement name="player-badge"
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- TOP BAR — full width, dark glass panel          -->
+        <!-- ════════════════════════════════════════════════ -->
+        <ui:VisualElement name="top-bar"
             picking-mode="Position"
-            style="position: absolute; left: 16px; top: 16px;
-                   flex-direction: row; align-items: center;
-                   background-color: rgba(8, 15, 30, 0.88);
-                   border-width: 1px;
-                   border-top-color: rgba(100, 120, 160, 0.2);
-                   border-left-color: rgba(100, 120, 160, 0.15);
-                   border-bottom-color: rgba(20, 30, 50, 0.5);
-                   border-right-color: rgba(20, 30, 50, 0.4);
-                   border-radius: 24px;
-                   padding-left: 4px; padding-right: 16px;
-                   padding-top: 4px; padding-bottom: 4px;">
+            style="position: absolute; left: 0; top: 0; right: 0; height: 48px;
+                   flex-direction: row; align-items: center; justify-content: space-between;
+                   background-color: rgba(18, 24, 32, 0.92);
+                   border-bottom-width: 1px; border-bottom-color: rgba(60, 80, 110, 0.25);
+                   padding-left: 12px; padding-right: 12px;">
 
-            <ui:VisualElement name="player-flag"
-                style="width: 40px; height: 40px;
-                       border-radius: 20px;
-                       border-width: 2px;
-                       border-color: rgba(212, 168, 67, 0.5);
-                       margin-right: 10px;
-                       overflow: hidden;" />
+            <!-- LEFT: Flag + Country Name -->
+            <ui:VisualElement name="top-bar-left"
+                style="flex-direction: row; align-items: center; flex-shrink: 0;">
 
-            <ui:VisualElement style="flex-direction: column;">
-                <ui:Label name="player-name" text=""
-                    style="font-size: 14px; color: #E8E8E8; -unity-font-style: bold;
-                           margin-bottom: 1px;" />
-                <ui:Label name="game-date" text=""
-                    style="font-size: 10px; color: rgba(136, 153, 170, 0.7);" />
+                <ui:VisualElement name="player-flag"
+                    style="width: 32px; height: 32px;
+                           border-radius: 4px;
+                           border-width: 1px; border-color: rgba(214, 179, 106, 0.4);
+                           margin-right: 10px;
+                           overflow: hidden;" />
+
+                <ui:Label name="player-name" text="Kingdom of Jordan"
+                    style="font-size: 14px; color: #E6E1D8; -unity-font-style: bold;
+                           letter-spacing: 1px;" />
+            </ui:VisualElement>
+
+            <!-- CENTER: Resource Counters -->
+            <ui:VisualElement name="resource-bar"
+                style="flex-direction: row; align-items: center;
+                       flex-grow: 0; flex-shrink: 0;">
+
+                <!-- GDP -->
+                <ui:VisualElement name="res-gdp" class="resource-item"
+                    style="flex-direction: row; align-items: center;
+                           margin-left: 16px; margin-right: 16px;">
+                    <ui:Label text="&#x1F4B0;" style="font-size: 14px; margin-right: 4px;" />
+                    <ui:Label name="gdp-value" text="254M"
+                        style="font-size: 13px; color: #D6B36A; -unity-font-style: bold;" />
+                </ui:VisualElement>
+
+                <!-- Separator -->
+                <ui:VisualElement style="width: 1px; height: 20px; background-color: rgba(255,255,255,0.08);" />
+
+                <!-- Manpower -->
+                <ui:VisualElement name="res-manpower" class="resource-item"
+                    style="flex-direction: row; align-items: center;
+                           margin-left: 16px; margin-right: 16px;">
+                    <ui:Label text="&#x1F6E1;" style="font-size: 13px; margin-right: 4px;" />
+                    <ui:Label name="manpower-value" text="112K"
+                        style="font-size: 13px; color: #A8B0B8; -unity-font-style: bold;" />
+                </ui:VisualElement>
+
+                <!-- Separator -->
+                <ui:VisualElement style="width: 1px; height: 20px; background-color: rgba(255,255,255,0.08);" />
+
+                <!-- Monthly Balance -->
+                <ui:VisualElement name="res-balance" class="resource-item"
+                    style="flex-direction: row; align-items: center;
+                           margin-left: 16px; margin-right: 16px;">
+                    <ui:Label text="&#x26A1;" style="font-size: 13px; margin-right: 4px;" />
+                    <ui:Label name="balance-value" text="+235"
+                        style="font-size: 13px; color: #4CAF50; -unity-font-style: bold;" />
+                </ui:VisualElement>
+
+                <!-- Separator -->
+                <ui:VisualElement style="width: 1px; height: 20px; background-color: rgba(255,255,255,0.08);" />
+
+                <!-- Population -->
+                <ui:VisualElement name="res-pop" class="resource-item"
+                    style="flex-direction: row; align-items: center;
+                           margin-left: 16px; margin-right: 16px;">
+                    <ui:Label text="&#x1F465;" style="font-size: 13px; margin-right: 4px;" />
+                    <ui:Label name="pop-value" text="88K"
+                        style="font-size: 13px; color: #A8B0B8; -unity-font-style: bold;" />
+                </ui:VisualElement>
+
+                <!-- Separator -->
+                <ui:VisualElement style="width: 1px; height: 20px; background-color: rgba(255,255,255,0.08);" />
+
+                <!-- Military -->
+                <ui:VisualElement name="res-military" class="resource-item"
+                    style="flex-direction: row; align-items: center;
+                           margin-left: 16px; margin-right: 16px;">
+                    <ui:Label text="&#x2694;" style="font-size: 13px; margin-right: 4px;" />
+                    <ui:Label name="military-value" text="320"
+                        style="font-size: 13px; color: #A8B0B8; -unity-font-style: bold;" />
+                </ui:VisualElement>
+
+                <!-- Separator -->
+                <ui:VisualElement style="width: 1px; height: 20px; background-color: rgba(255,255,255,0.08);" />
+
+                <!-- Stability -->
+                <ui:VisualElement name="res-stability" class="resource-item"
+                    style="flex-direction: row; align-items: center;
+                           margin-left: 16px; margin-right: 16px;">
+                    <ui:Label text="&#x2696;" style="font-size: 13px; margin-right: 4px;" />
+                    <ui:Label name="stability-value" text="56"
+                        style="font-size: 13px; color: #A8B0B8; -unity-font-style: bold;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- RIGHT: Country Name + Flag + Date + Speed + Menu -->
+            <ui:VisualElement name="top-bar-right"
+                style="flex-direction: row; align-items: center; flex-shrink: 0;">
+
+                <!-- Date -->
+                <ui:Label name="game-date" text="15 Jan 2026"
+                    style="font-size: 11px; color: #8899AA;
+                           margin-right: 16px;" />
+
+                <!-- Speed Controls -->
+                <ui:VisualElement name="speed-controls"
+                    style="flex-direction: row; align-items: center;
+                           background-color: rgba(0, 0, 0, 0.25);
+                           border-radius: 4px;
+                           padding: 4px 6px;
+                           margin-right: 12px;">
+
+                    <ui:Button name="pause-btn" text="&#x23F8;"
+                        style="width: 26px; height: 22px;
+                               background-color: rgba(0,0,0,0);
+                               color: #8899AA; font-size: 11px;
+                               border-width: 0;
+                               -unity-text-align: middle-center;
+                               margin-right: 2px;" />
+
+                    <ui:Label name="speed-label" text="1x"
+                        style="font-size: 11px; color: #D6B36A;
+                               min-width: 22px; -unity-text-align: middle-center;
+                               margin-right: 2px;" />
+
+                    <ui:Button name="speed-up-btn" text="&#x25B6;"
+                        style="width: 26px; height: 22px;
+                               background-color: rgba(0,0,0,0);
+                               color: #8899AA; font-size: 11px;
+                               border-width: 0;
+                               -unity-text-align: middle-center;" />
+                </ui:VisualElement>
+
+                <!-- Menu Button -->
+                <ui:Button name="menu-btn" text="&#x2630;"
+                    style="width: 32px; height: 32px;
+                           background-color: rgba(0,0,0,0);
+                           color: #8899AA; font-size: 18px;
+                           border-width: 0;
+                           -unity-text-align: middle-center;" />
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- Top-right: Speed controls -->
-        <ui:VisualElement name="speed-controls"
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- LEFT SIDE PANEL — Category navigation           -->
+        <!-- ════════════════════════════════════════════════ -->
+        <ui:VisualElement name="left-panel"
             picking-mode="Position"
-            style="position: absolute; right: 16px; top: 16px;
+            style="position: absolute; left: 0; top: 56px;
+                   flex-direction: column; align-items: center;
+                   background-color: rgba(18, 24, 32, 0.88);
+                   border-right-width: 1px; border-right-color: rgba(60, 80, 110, 0.2);
+                   border-bottom-right-radius: 8px;
+                   padding: 8px 6px; width: 72px;">
+
+            <!-- Diplomacy -->
+            <ui:Button name="btn-diplomacy" class="nav-btn"
+                style="width: 56px; height: 56px;
+                       background-color: rgba(255,255,255,0.04);
+                       border-width: 1px; border-color: rgba(255,255,255,0.06);
+                       border-radius: 8px;
+                       margin-bottom: 4px;
+                       flex-direction: column; align-items: center; justify-content: center;">
+                <ui:Label text="&#x1F91D;" style="font-size: 22px;" />
+                <ui:Label text="Diplomacy" style="font-size: 8px; color: #8899AA; margin-top: 2px;" />
+            </ui:Button>
+
+            <!-- Research -->
+            <ui:Button name="btn-research" class="nav-btn"
+                style="width: 56px; height: 56px;
+                       background-color: rgba(255,255,255,0.04);
+                       border-width: 1px; border-color: rgba(255,255,255,0.06);
+                       border-radius: 8px;
+                       margin-bottom: 4px;
+                       flex-direction: column; align-items: center; justify-content: center;">
+                <ui:Label text="&#x269B;" style="font-size: 22px;" />
+                <ui:Label text="Research" style="font-size: 8px; color: #8899AA; margin-top: 2px;" />
+            </ui:Button>
+
+            <!-- Production -->
+            <ui:Button name="btn-production" class="nav-btn"
+                style="width: 56px; height: 56px;
+                       background-color: rgba(255,255,255,0.04);
+                       border-width: 1px; border-color: rgba(255,255,255,0.06);
+                       border-radius: 8px;
+                       margin-bottom: 4px;
+                       flex-direction: column; align-items: center; justify-content: center;">
+                <ui:Label text="&#x1F3ED;" style="font-size: 22px;" />
+                <ui:Label text="Production" style="font-size: 8px; color: #8899AA; margin-top: 2px;" />
+            </ui:Button>
+
+            <!-- Espionage -->
+            <ui:Button name="btn-espionage" class="nav-btn"
+                style="width: 56px; height: 56px;
+                       background-color: rgba(255,255,255,0.04);
+                       border-width: 1px; border-color: rgba(255,255,255,0.06);
+                       border-radius: 8px;
+                       flex-direction: column; align-items: center; justify-content: center;">
+                <ui:Label text="&#x1F575;" style="font-size: 22px;" />
+                <ui:Label text="Espionage" style="font-size: 8px; color: #8899AA; margin-top: 2px;" />
+            </ui:Button>
+        </ui:VisualElement>
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- BOTTOM TAB BAR — Mode switching                 -->
+        <!-- ════════════════════════════════════════════════ -->
+        <ui:VisualElement name="bottom-bar"
+            picking-mode="Position"
+            style="position: absolute; bottom: 0; left: 50%;
+                   translate: -50% 0;
                    flex-direction: row; align-items: center;
-                   background-color: rgba(8, 15, 30, 0.88);
-                   border-width: 1px; border-color: rgba(30, 48, 80, 0.3);
-                   border-radius: 4px;
-                   padding-left: 8px; padding-right: 8px;
-                   padding-top: 6px; padding-bottom: 6px;">
+                   background-color: rgba(18, 24, 32, 0.92);
+                   border-top-width: 1px; border-top-color: rgba(60, 80, 110, 0.25);
+                   border-top-left-radius: 8px; border-top-right-radius: 8px;
+                   padding: 6px 8px;">
 
-            <ui:Button name="pause-btn" text="II"
-                style="width: 28px; height: 24px;
-                       background-color: rgba(0,0,0,0);
-                       color: #8899AA; font-size: 12px;
-                       border-width: 1px; border-color: rgba(30, 48, 80, 0.3); border-radius: 3px;
-                       margin-right: 4px;
-                       -unity-text-align: middle-center;" />
-
-            <ui:Label name="speed-label" text="Speed 1"
-                style="font-size: 11px; color: rgba(136, 153, 170, 0.8);
+            <ui:Button name="tab-economy" text="Economy" class="tab-btn"
+                style="padding: 8px 20px;
+                       background-color: rgba(214, 179, 106, 0.15);
+                       border-width: 1px; border-color: rgba(214, 179, 106, 0.3);
+                       border-radius: 4px;
+                       color: #D6B36A; font-size: 12px; -unity-font-style: bold;
                        margin-right: 4px;" />
 
-            <ui:Button name="speed-up-btn" text=">"
-                style="width: 24px; height: 24px;
-                       background-color: rgba(0,0,0,0);
+            <ui:Button name="tab-military" text="Military" class="tab-btn"
+                style="padding: 8px 20px;
+                       background-color: rgba(255,255,255,0.03);
+                       border-width: 1px; border-color: rgba(255,255,255,0.06);
+                       border-radius: 4px;
                        color: #8899AA; font-size: 12px;
-                       border-width: 1px; border-color: rgba(30, 48, 80, 0.3); border-radius: 3px;
-                       -unity-text-align: middle-center;" />
+                       margin-right: 4px;" />
+
+            <ui:Button name="tab-technology" text="Technology" class="tab-btn"
+                style="padding: 8px 20px;
+                       background-color: rgba(255,255,255,0.03);
+                       border-width: 1px; border-color: rgba(255,255,255,0.06);
+                       border-radius: 4px;
+                       color: #8899AA; font-size: 12px;
+                       margin-right: 4px;" />
+
+            <ui:Button name="tab-diplomacy" text="Diplomacy" class="tab-btn"
+                style="padding: 8px 20px;
+                       background-color: rgba(255,255,255,0.03);
+                       border-width: 1px; border-color: rgba(255,255,255,0.06);
+                       border-radius: 4px;
+                       color: #8899AA; font-size: 12px;" />
         </ui:VisualElement>
+
     </ui:VisualElement>
 </ui:UXML>
