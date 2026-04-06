@@ -20,7 +20,7 @@ Shader "WarStrategy/MapShader"
         [Toggle] _HasDetail ("Has Detail", Float) = 0
         [Toggle] _HasTerrainTypes ("Has Terrain Types", Float) = 0
 
-        _CountryColorStr ("Country Color Strength", Range(0,1)) = 0.65
+        _CountryColorStr ("Country Color Strength", Range(0,1)) = 0.55
         _TerrainDesat ("Terrain Desat", Range(0,1)) = 0.10
         _ElevationStrength ("Elevation Relief", Float) = 12.0
         _NoiseStr ("Noise Strength", Float) = 0.012
@@ -34,7 +34,7 @@ Shader "WarStrategy/MapShader"
         _PaperTint ("Paper Tint", Color) = (1.0, 0.96, 0.88, 1)
         _PaperStrength ("Paper Strength", Float) = 0.18
 
-        _CloudStr ("Cloud Strength", Range(0,1)) = 0.30
+        _CloudStr ("Cloud Strength", Range(0,1)) = 0.18
         _CloudScale ("Cloud Scale", Float) = 1.5
         _CloudSpeed ("Cloud Speed", Float) = 0.02
         _FogStr ("Fog Strength", Range(0,1)) = 0.06
@@ -267,26 +267,69 @@ Shader "WarStrategy/MapShader"
                 if (idxD != idx) { edgeFactor += 0.25; if (idxD > 0) { neighborBlend += LookupColor(idxD); nCount++; } }
                 if (nCount > 0) neighborBlend /= (float)nCount;
 
-                // ── Terrain base ──
+                // ── Terrain base (use terrainUV for parallax-shifted sampling) ──
                 float3 terrain = float3(0.5, 0.5, 0.5);
                 if (_HasTerrain > 0.5)
-                    terrain = SAMPLE_TEXTURE2D(_TerrainTex, sampler_TerrainTex, uv).rgb;
+                    terrain = SAMPLE_TEXTURE2D(_TerrainTex, sampler_TerrainTex, terrainUV).rgb;
 
-                // ── Heightmap ──
+                // ── Heightmap with 3×3 Sobel normals ──
                 float height = 0.0;
                 float relief = 0.0;
                 float dx = 0.0;
                 float dy = 0.0;
+                float selfShadow = 1.0;
+                // Parallax terrain UV (shifted for visual depth, separate from political UV)
+                float2 terrainUV = uv;
                 if (_HasHeightmap > 0.5)
                 {
                     height = SAMPLE_TEXTURE2D(_HeightmapTex, sampler_HeightmapTex, uv).r;
-                    float hL = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, uv + float2(-hpx.x, 0), 0).r;
-                    float hR = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, uv + float2( hpx.x, 0), 0).r;
-                    float hU = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, uv + float2(0, -hpx.y), 0).r;
-                    float hD = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, uv + float2(0,  hpx.y), 0).r;
-                    dx = (hR - hL);
-                    dy = (hD - hU);
+
+                    // Parallax relief: shift terrain UV based on height (zoom-gated)
+                    float pomFade = saturate((_ZoomLevel - 4.0) / 6.0);
+                    if (pomFade > 0.01)
+                    {
+                        // Multi-step parallax (4 iterations for smooth depth)
+                        float2 pDir = float2(-0.4, 0.25) * hpx * 3.0 * pomFade;
+                        float ph = height;
+                        for (int pi = 0; pi < 4; pi++)
+                        {
+                            terrainUV -= pDir * ph;
+                            ph = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, terrainUV, 0).r;
+                        }
+                        height = ph; // use parallax-corrected height
+                    }
+
+                    // 3×3 Sobel kernel for smooth normals (8 neighbor reads)
+                    float hTL = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, terrainUV + float2(-hpx.x, -hpx.y), 0).r;
+                    float hT  = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, terrainUV + float2(0, -hpx.y), 0).r;
+                    float hTR = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, terrainUV + float2( hpx.x, -hpx.y), 0).r;
+                    float hL  = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, terrainUV + float2(-hpx.x, 0), 0).r;
+                    float hR  = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, terrainUV + float2( hpx.x, 0), 0).r;
+                    float hBL = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, terrainUV + float2(-hpx.x,  hpx.y), 0).r;
+                    float hB  = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, terrainUV + float2(0,  hpx.y), 0).r;
+                    float hBR = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex, terrainUV + float2( hpx.x,  hpx.y), 0).r;
+
+                    // Sobel operators
+                    dx = (hTR + 2.0*hR + hBR) - (hTL + 2.0*hL + hBL);
+                    dy = (hBL + 2.0*hB + hBR) - (hTL + 2.0*hT + hTR);
                     relief = (-dx + dy) * _ElevationStrength;
+
+                    // Self-shadowing: trace toward sun in UV space (zoom-gated)
+                    float shadowFade = saturate((_ZoomLevel - 2.0) / 3.0);
+                    if (shadowFade > 0.01)
+                    {
+                        float2 sunUV = normalize(float2(-0.5, 0.3)) * hpx * 2.5;
+                        float currentH = height;
+                        selfShadow = 1.0;
+                        for (int si = 1; si <= 8; si++)
+                        {
+                            float sH = SAMPLE_TEXTURE2D_LOD(_HeightmapTex, sampler_HeightmapTex,
+                                terrainUV + sunUV * (float)si, 0).r;
+                            float hDiff = sH - currentH - 0.005 * (float)si;
+                            selfShadow = min(selfShadow, 1.0 - saturate(hDiff * 12.0));
+                        }
+                        selfShadow = lerp(1.0, selfShadow, 0.55 * shadowFade);
+                    }
                 }
 
                 float3 col;
@@ -382,11 +425,12 @@ Shader "WarStrategy/MapShader"
 
                     // Step 1: Blend terrain texture with procedural biome coloring
                     float3 biomeBase = terrain;
+                    float cachedTerrainType = -1.0; // cache for reuse in biome detail
                     if (_HasTerrainTypes > 0.5 && _HasTerrain > 0.5)
                     {
-                        // Blend: terrain.png provides real geography, BiomeColor provides palette warmth
-                        float tt = SAMPLE_TEXTURE2D(_TerrainTypeTex, sampler_TerrainTypeTex, uv).r;
-                        float3 biomeCol = BiomeColor(tt, height, uv);
+                        float tt = SAMPLE_TEXTURE2D(_TerrainTypeTex, sampler_TerrainTypeTex, terrainUV).r;
+                        cachedTerrainType = tt;
+                        float3 biomeCol = BiomeColor(tt, height, terrainUV);
                         // Boost terrain saturation before blending
                         float tLum = Lum(terrain);
                         float3 terrSat = lerp(float3(tLum,tLum,tLum), terrain, 1.8);
@@ -416,16 +460,19 @@ Shader "WarStrategy/MapShader"
                     // Step 3: Multi-scale biome detail (more detail as you zoom IN)
                     if (_HasTerrainTypes > 0.5)
                     {
-                        float tt = SAMPLE_TEXTURE2D(_TerrainTypeTex, sampler_TerrainTypeTex, uv).r * 255.0;
+                        // Reuse cached terrain type if available, otherwise sample
+                        float ttRaw = cachedTerrainType >= 0.0 ? cachedTerrainType :
+                            SAMPLE_TEXTURE2D(_TerrainTypeTex, sampler_TerrainTypeTex, terrainUV).r;
+                        float tt = ttRaw * 255.0;
                         int bi = clamp((int)(tt + 0.5), 0, 5);
                         float ac = (float)(bi % 3);
                         float ar = (float)(bi / 3);
 
                         // Scale 1: broad biome pattern (always visible)
-                        float2 buv = float2((ac + frac(uv.x * 8.0)) / 3.0, (ar + frac(uv.y * 8.0)) / 2.0);
+                        float2 buv = float2((ac + frac(terrainUV.x * 8.0)) / 3.0, (ar + frac(terrainUV.y * 8.0)) / 2.0);
                         float3 bc = SAMPLE_TEXTURE2D(_BiomeAtlas, sampler_BiomeAtlas, buv).rgb;
-                        float2 buv2 = float2((ac + frac(uv.x * 11.3 + smoothNoise(uv * 3.0) * 0.1)) / 3.0,
-                                              (ar + frac(uv.y * 11.3)) / 2.0);
+                        float2 buv2 = float2((ac + frac(terrainUV.x * 11.3 + smoothNoise(terrainUV * 3.0) * 0.1)) / 3.0,
+                                              (ar + frac(terrainUV.y * 11.3)) / 2.0);
                         float3 bc2 = SAMPLE_TEXTURE2D(_BiomeAtlas, sampler_BiomeAtlas, buv2).rgb;
                         bc = bc * 0.6 + bc2 * 0.4;
                         col = lerp(col, col * bc, _BiomeDetailStrength * 0.6);
@@ -455,8 +502,8 @@ Shader "WarStrategy/MapShader"
                         float detZoom = saturate((_ZoomLevel - 2.0) / 6.0);
                         if (detZoom > 0.01)
                         {
-                            float det1 = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, uv * 16.0).r;
-                            float det2 = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, uv * 40.0 + 0.5).r;
+                            float det1 = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, terrainUV * 16.0).r;
+                            float det2 = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, terrainUV * 40.0 + 0.5).r;
                             float detMix = det1 * 0.6 + det2 * 0.4;
                             col *= lerp(1.0, 0.85 + 0.30 * detMix, _DetailStrength * 3.0 * detZoom);
                         }
@@ -475,6 +522,8 @@ Shader "WarStrategy/MapShader"
                         float ao = saturate(1.0 - grad * _ElevationStrength * 0.8);
                         lighting *= lerp(0.85, 1.0, ao);
                         col *= clamp(lighting, 0.50, 1.40); // dramatic range for 3D depth
+                        // Apply self-shadowing (mountains cast shadows on valleys)
+                        col *= selfShadow;
                         // Elevation color shift: warm lowlands, slightly cool highlands
                         float3 lowTint  = float3(1.02, 0.98, 0.92); // warm boost
                         float3 highTint = float3(0.92, 0.92, 0.94); // barely cool
@@ -719,7 +768,7 @@ Shader "WarStrategy/MapShader"
                     // Dramatic clouds: whiter, more visible (like actual cloud banks)
                     float3 cloudCol = col * 0.70 + float3(0.18, 0.18, 0.20);
                     cloudCol = Desat(cloudCol, 0.08);
-                    col = lerp(col, cloudCol, clouds * _CloudStr * cloudFade * cloudMask * 1.5);
+                    col = lerp(col, cloudCol, clouds * _CloudStr * cloudFade * cloudMask);
                 }
 
                 // Distance fog (atmospheric haze at viewport edges)
