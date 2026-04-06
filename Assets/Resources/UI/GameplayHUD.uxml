@@ -33,49 +33,49 @@
                 style="flex-direction: row; align-items: center;">
 
                 <!-- Treasury -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 12px; margin-right: 12px;">
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 14px; margin-right: 14px;">
                     <ui:VisualElement name="icon-treasury"
-                        style="width: 20px; height: 20px; margin-right: 5px;" />
+                        style="width: 20px; height: 20px; margin-right: 4px;" />
                     <ui:Label name="gdp-value" text=""
                         style="font-size: 13px; color: #D4A843; -unity-font-style: bold;" />
                 </ui:VisualElement>
 
-                <ui:VisualElement style="width: 1px; height: 22px; background-color: rgba(255,255,255,0.08);" />
+                <ui:VisualElement style="width: 1px; height: 20px; background-color: rgba(255,255,255,0.10);" />
 
                 <!-- Manpower -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 12px; margin-right: 12px;">
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 14px; margin-right: 14px;">
                     <ui:VisualElement name="icon-manpower"
-                        style="width: 20px; height: 20px; margin-right: 5px;" />
+                        style="width: 20px; height: 20px; margin-right: 4px;" />
                     <ui:Label name="manpower-value" text=""
                         style="font-size: 13px; color: #E8E8E8; -unity-font-style: bold;" />
                 </ui:VisualElement>
 
-                <ui:VisualElement style="width: 1px; height: 22px; background-color: rgba(255,255,255,0.08);" />
+                <ui:VisualElement style="width: 1px; height: 20px; background-color: rgba(255,255,255,0.10);" />
 
                 <!-- Energy/Balance -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 12px; margin-right: 12px;">
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 14px; margin-right: 14px;">
                     <ui:VisualElement name="icon-energy"
-                        style="width: 20px; height: 20px; margin-right: 5px;" />
+                        style="width: 20px; height: 20px; margin-right: 4px;" />
                     <ui:Label name="balance-value" text=""
                         style="font-size: 13px; color: #4CAF50; -unity-font-style: bold;" />
                 </ui:VisualElement>
 
-                <ui:VisualElement style="width: 1px; height: 22px; background-color: rgba(255,255,255,0.08);" />
+                <ui:VisualElement style="width: 1px; height: 20px; background-color: rgba(255,255,255,0.10);" />
 
                 <!-- Military -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 12px; margin-right: 12px;">
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 14px; margin-right: 14px;">
                     <ui:VisualElement name="icon-military"
-                        style="width: 20px; height: 20px; margin-right: 5px;" />
+                        style="width: 20px; height: 20px; margin-right: 4px;" />
                     <ui:Label name="military-value" text=""
                         style="font-size: 13px; color: #E8E8E8; -unity-font-style: bold;" />
                 </ui:VisualElement>
 
-                <ui:VisualElement style="width: 1px; height: 22px; background-color: rgba(255,255,255,0.08);" />
+                <ui:VisualElement style="width: 1px; height: 20px; background-color: rgba(255,255,255,0.10);" />
 
                 <!-- Stability -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 12px; margin-right: 12px;">
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 14px; margin-right: 14px;">
                     <ui:VisualElement name="icon-stability"
-                        style="width: 20px; height: 20px; margin-right: 5px;" />
+                        style="width: 20px; height: 20px; margin-right: 4px;" />
                     <ui:Label name="stability-value" text=""
                         style="font-size: 13px; color: #E8E8E8; -unity-font-style: bold;" />
                 </ui:VisualElement>
