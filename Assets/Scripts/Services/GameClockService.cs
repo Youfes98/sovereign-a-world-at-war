@@ -125,11 +125,11 @@ namespace WarStrategy.Core
         public string GetDateString()
         {
             string[] months = {
-                "", "January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"
+                "", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
             };
             int m = Mathf.Clamp(Date.Month, 1, 12);
-            return $"{months[m]} {Date.Day}, {Date.Year}";
+            return $"{Date.Day} {months[m]} {Date.Year}";
         }
     }
 }
