@@ -20,7 +20,7 @@ namespace WarStrategy.UI
         private Label _gdpValue, _manpowerValue, _balanceValue;
         private Label _popValue, _militaryValue, _stabilityValue;
         private Label _speedLabel;
-        private Button _pauseBtn, _speedUpBtn, _menuBtn;
+        private Button _pauseBtn, _speedUpBtn, _speedDownBtn, _menuBtn;
 
         // Left nav buttons
         private Button _btnDiplomacy, _btnResearch, _btnProduction, _btnEspionage;
@@ -48,10 +48,12 @@ namespace WarStrategy.UI
             // Speed controls
             _pauseBtn = root.Q<Button>("pause-btn");
             _speedUpBtn = root.Q<Button>("speed-up-btn");
+            _speedDownBtn = root.Q<Button>("speed-down-btn");
             _menuBtn = root.Q<Button>("menu-btn");
 
             if (_pauseBtn != null) _pauseBtn.clicked += OnPauseClicked;
             if (_speedUpBtn != null) _speedUpBtn.clicked += OnSpeedUpClicked;
+            if (_speedDownBtn != null) _speedDownBtn.clicked += OnSpeedDownClicked;
 
             // Left nav
             _btnDiplomacy = root.Q<Button>("btn-diplomacy");
@@ -155,7 +157,14 @@ namespace WarStrategy.UI
         private void OnSpeedUpClicked()
         {
             if (Services.Clock == null) return;
-            Services.Clock.SetSpeed(Services.Clock.Speed + 1);
+            Services.Clock.SetSpeed(Mathf.Min(Services.Clock.Speed + 1, 5));
+            UpdateSpeedDisplay();
+        }
+
+        private void OnSpeedDownClicked()
+        {
+            if (Services.Clock == null) return;
+            Services.Clock.SetSpeed(Mathf.Max(Services.Clock.Speed - 1, 1));
             UpdateSpeedDisplay();
         }
 
