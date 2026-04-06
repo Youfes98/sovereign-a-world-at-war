@@ -155,21 +155,21 @@ namespace WarStrategy.UI
         private void OnSpeedUpClicked()
         {
             if (Services.Clock == null) return;
-            Services.Clock.IncreaseSpeed();
+            Services.Clock.SetSpeed(Services.Clock.Speed + 1);
             UpdateSpeedDisplay();
         }
 
         private void UpdateSpeedDisplay()
         {
             if (_speedLabel == null || Services.Clock == null) return;
-            if (Services.Clock.IsPaused)
+            if (Services.Clock.Paused)
             {
                 _speedLabel.text = "II";
                 _speedLabel.style.color = new Color(0.75f, 0.22f, 0.17f);
             }
             else
             {
-                _speedLabel.text = $"{Services.Clock.CurrentSpeed}x";
+                _speedLabel.text = $"{Services.Clock.Speed}x";
                 _speedLabel.style.color = new Color(0.84f, 0.70f, 0.42f); // gold
             }
         }
