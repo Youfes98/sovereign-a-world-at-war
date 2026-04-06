@@ -8,20 +8,19 @@
         <!-- Top Bar -->
         <ui:VisualElement name="top-bar"
             style="flex-direction: row; height: 48px;
-                   background-color: rgba(8, 14, 24, 0.92);
-                   border-bottom-width: 1px; border-bottom-color: rgba(60, 80, 110, 0.3);
+                   background-color: #19202b;
                    align-items: center; padding-left: 20px; padding-right: 20px;
                    justify-content: space-between;">
 
             <ui:Button name="back-btn" text="ESC  BACK"
                 style="height: 30px; padding-left: 14px; padding-right: 14px;
                        background-color: rgba(0,0,0,0);
-                       color: #667788; font-size: 12px;
-                       border-width: 1px; border-color: rgba(255,255,255,0.08); border-radius: 3px;" />
+                       color: #b7c8de; font-size: 12px;
+                       border-width: 1px; border-color: rgba(78,70,54,0.15); border-radius: 0px;" />
 
             <ui:Label text="SELECT YOUR NATION"
                 style="-unity-text-align: middle-center;
-                       font-size: 14px; color: rgba(212, 168, 67, 0.7);
+                       font-size: 14px; color: rgba(242, 195, 91, 0.7);
                        letter-spacing: 5px; -unity-font-style: bold;" />
 
             <ui:VisualElement style="width: 90px;" />
@@ -30,16 +29,14 @@
         <!-- Map fills remaining space -->
         <ui:VisualElement style="flex-grow: 1;" picking-mode="Ignore" />
 
-        <!-- ═══════════════════════════════════════════ -->
-        <!-- COUNTRY INFO PANEL (right side, full height)-->
-        <!-- ═══════════════════════════════════════════ -->
+        <!-- COUNTRY INFO PANEL (right side, full height) -->
         <ui:VisualElement name="country-card"
             picking-mode="Position"
             style="position: absolute;
                    right: 0; top: 48px; bottom: 0;
                    width: 360px;
-                   background-color: rgba(10, 16, 26, 0.95);
-                   border-left-width: 1px; border-left-color: rgba(80, 100, 130, 0.2);
+                   background-color: rgba(21, 28, 39, 0.95);
+                   border-radius: 0px;
                    display: none;
                    translate: 360px 0;
                    opacity: 0;
@@ -51,196 +48,195 @@
 
             <!-- Header: Flag + Name + Info -->
             <ui:VisualElement style="padding: 24px 24px 16px 24px;
-                                     border-bottom-width: 1px; border-bottom-color: rgba(255,255,255,0.06);">
+                                     background-color: #19202b;">
 
                 <!-- Flag (rectangular display) -->
                 <ui:VisualElement style="flex-direction: row; align-items: flex-start; margin-bottom: 16px;">
                     <ui:VisualElement name="flag-image"
                         style="width: 80px; height: 54px;
-                               border-radius: 4px;
-                               border-width: 2px; border-color: rgba(255,255,255,0.15);
+                               border-radius: 0px;
+                               border-width: 1px; border-color: rgba(78,70,54,0.30);
                                margin-right: 16px;
                                background-color: rgba(0,0,0,0.3);
                                -unity-background-scale-mode: scale-and-crop;" />
 
                     <ui:VisualElement style="flex-grow: 1; flex-direction: column; justify-content: center;">
                         <ui:Label name="country-name" text=""
-                            style="font-size: 22px; color: #F0EDE5; -unity-font-style: bold;
+                            style="font-size: 24px; color: #dce2f3; -unity-font-style: bold;
                                    margin-bottom: 2px;" />
                         <ui:Label name="govt-type" text=""
-                            style="font-size: 12px; color: #D4A843; -unity-font-style: italic;
+                            style="font-size: 12px; color: #d4a843; -unity-font-style: italic;
                                    margin-bottom: 2px;" />
                         <ui:Label name="region-label" text=""
-                            style="font-size: 11px; color: #667788;" />
+                            style="font-size: 11px; color: #b7c8de;" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- Quick Info Row -->
                 <ui:VisualElement style="flex-direction: row; justify-content: space-between;
-                                         background-color: rgba(255,255,255,0.03);
-                                         border-radius: 4px; padding: 8px 12px;">
+                                         background-color: #232a36;
+                                         border-radius: 0px; padding: 8px 12px;">
                     <ui:VisualElement style="flex-direction: column; align-items: center;">
-                        <ui:Label text="CAPITAL" style="font-size: 8px; color: #556677; letter-spacing: 1px;
+                        <ui:Label text="CAPITAL" style="font-size: 8px; color: #b7c8de; letter-spacing: 1px;
                                   margin-bottom: 2px;" />
                         <ui:Label name="capital-value" text=""
-                            style="font-size: 12px; color: #CCCCCC; -unity-font-style: bold;" />
+                            style="font-size: 12px; color: #dce2f3; -unity-font-style: bold;" />
                     </ui:VisualElement>
-                    <ui:VisualElement style="width: 1px; height: 28px; background-color: rgba(255,255,255,0.06);" />
                     <ui:VisualElement style="flex-direction: column; align-items: center;">
-                        <ui:Label text="TIER" style="font-size: 8px; color: #556677; letter-spacing: 1px;
+                        <ui:Label text="TIER" style="font-size: 8px; color: #b7c8de; letter-spacing: 1px;
                                   margin-bottom: 2px;" />
                         <ui:Label name="tier-badge" text=""
                             style="font-size: 12px; -unity-font-style: bold;
-                                   padding: 1px 8px; border-radius: 2px;" />
+                                   color: #f2c35b;
+                                   padding: 1px 8px; border-radius: 0px;" />
                     </ui:VisualElement>
-                    <ui:VisualElement style="width: 1px; height: 28px; background-color: rgba(255,255,255,0.06);" />
                     <ui:VisualElement style="flex-direction: column; align-items: center;">
-                        <ui:Label text="DIFFICULTY" style="font-size: 8px; color: #556677; letter-spacing: 1px;
+                        <ui:Label text="DIFFICULTY" style="font-size: 8px; color: #b7c8de; letter-spacing: 1px;
                                   margin-bottom: 2px;" />
                         <ui:Label name="difficulty-label" text=""
-                            style="font-size: 12px; -unity-font-style: bold;" />
+                            style="font-size: 12px; color: #dce2f3; -unity-font-style: bold;" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
 
             <!-- Stats Section -->
             <ui:VisualElement style="padding: 16px 24px; flex-direction: column;
-                                     border-top-width: 1px; border-top-color: rgba(212, 168, 67, 0.1);
-                                     border-bottom-width: 1px; border-bottom-color: rgba(255,255,255,0.06);">
+                                     background-color: #151c27;">
 
                 <!-- GDP -->
                 <ui:VisualElement style="flex-direction: row; justify-content: space-between;
                                          align-items: center; margin-bottom: 12px;">
-                    <ui:Label text="GDP" style="width: 40px; font-size: 11px; color: #667788;
+                    <ui:Label text="GDP" style="width: 40px; font-size: 11px; color: #b7c8de;
                               letter-spacing: 1px; -unity-font-style: bold;" />
                     <ui:VisualElement style="flex-grow: 1; height: 4px;
-                        background-color: rgba(255,255,255,0.06); border-radius: 2px;
+                        background-color: #232a36; border-radius: 0px;
                         margin-left: 8px; margin-right: 10px; overflow: hidden;">
                         <ui:VisualElement name="gdp-bar"
                             style="height: 100%; width: 0%;
-                                   background-color: #D4A843; border-radius: 2px;
+                                   background-color: #d4a843; border-radius: 0px;
                                    transition-property: width; transition-duration: 0.6s;
                                    transition-timing-function: ease-out-cubic; transition-delay: 0.15s;" />
                     </ui:VisualElement>
                     <ui:Label name="gdp-value" text=""
-                        style="min-width: 65px; font-size: 14px; color: #D4A843;
+                        style="min-width: 65px; font-size: 14px; color: #f2c35b;
                                -unity-text-align: middle-right; -unity-font-style: bold;" />
                 </ui:VisualElement>
 
                 <!-- Population -->
                 <ui:VisualElement style="flex-direction: row; justify-content: space-between;
                                          align-items: center; margin-bottom: 12px;">
-                    <ui:Label text="POP" style="width: 40px; font-size: 11px; color: #667788;
+                    <ui:Label text="POP" style="width: 40px; font-size: 11px; color: #b7c8de;
                               letter-spacing: 1px; -unity-font-style: bold;" />
                     <ui:VisualElement style="flex-grow: 1; height: 4px;
-                        background-color: rgba(255,255,255,0.06); border-radius: 2px;
+                        background-color: #232a36; border-radius: 0px;
                         margin-left: 8px; margin-right: 10px; overflow: hidden;">
                         <ui:VisualElement name="pop-bar"
                             style="height: 100%; width: 0%;
-                                   background-color: #5B9BD5; border-radius: 2px;
+                                   background-color: #5B9BD5; border-radius: 0px;
                                    transition-property: width; transition-duration: 0.6s;
                                    transition-timing-function: ease-out-cubic; transition-delay: 0.22s;" />
                     </ui:VisualElement>
                     <ui:Label name="pop-value" text=""
-                        style="min-width: 65px; font-size: 14px; color: #E8E8E8;
+                        style="min-width: 65px; font-size: 14px; color: #dce2f3;
                                -unity-text-align: middle-right; -unity-font-style: bold;" />
                 </ui:VisualElement>
 
                 <!-- Military -->
                 <ui:VisualElement style="flex-direction: row; justify-content: space-between;
                                          align-items: center; margin-bottom: 12px;">
-                    <ui:Label text="MIL" style="width: 40px; font-size: 11px; color: #667788;
+                    <ui:Label text="MIL" style="width: 40px; font-size: 11px; color: #b7c8de;
                               letter-spacing: 1px; -unity-font-style: bold;" />
                     <ui:VisualElement style="flex-grow: 1; height: 4px;
-                        background-color: rgba(255,255,255,0.06); border-radius: 2px;
+                        background-color: #232a36; border-radius: 0px;
                         margin-left: 8px; margin-right: 10px; overflow: hidden;">
                         <ui:VisualElement name="mil-bar"
                             style="height: 100%; width: 0%;
-                                   background-color: #C0544E; border-radius: 2px;
+                                   background-color: #C0544E; border-radius: 0px;
                                    transition-property: width; transition-duration: 0.6s;
                                    transition-timing-function: ease-out-cubic; transition-delay: 0.29s;" />
                     </ui:VisualElement>
                     <ui:Label name="mil-value" text=""
-                        style="min-width: 65px; font-size: 14px; color: #E8E8E8;
+                        style="min-width: 65px; font-size: 14px; color: #dce2f3;
                                -unity-text-align: middle-right; -unity-font-style: bold;" />
                 </ui:VisualElement>
 
                 <!-- Stability -->
                 <ui:VisualElement style="flex-direction: row; justify-content: space-between;
                                          align-items: center;">
-                    <ui:Label text="STAB" style="width: 40px; font-size: 11px; color: #667788;
+                    <ui:Label text="STAB" style="width: 40px; font-size: 11px; color: #b7c8de;
                               letter-spacing: 1px; -unity-font-style: bold;" />
                     <ui:VisualElement style="flex-grow: 1; height: 4px;
-                        background-color: rgba(255,255,255,0.06); border-radius: 2px;
+                        background-color: #232a36; border-radius: 0px;
                         margin-left: 8px; margin-right: 10px; overflow: hidden;">
                         <ui:VisualElement name="stability-bar"
                             style="height: 100%; width: 0%;
-                                   background-color: #4CAF50; border-radius: 2px;
+                                   background-color: #4CAF50; border-radius: 0px;
                                    transition-property: width; transition-duration: 0.6s;
                                    transition-timing-function: ease-out-cubic; transition-delay: 0.36s;" />
                     </ui:VisualElement>
                     <ui:Label name="stability-value" text=""
-                        style="min-width: 65px; font-size: 14px; color: #E8E8E8;
+                        style="min-width: 65px; font-size: 14px; color: #dce2f3;
                                -unity-text-align: middle-right; -unity-font-style: bold;" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
             <!-- Additional Info Section -->
             <ui:VisualElement style="padding: 16px 24px; flex-direction: column;
-                                     border-bottom-width: 1px; border-bottom-color: rgba(255,255,255,0.06);">
+                                     background-color: #19202b;">
 
                 <!-- 2-column detail grid -->
                 <ui:VisualElement style="flex-direction: row; margin-bottom: 10px;">
                     <ui:VisualElement style="flex-grow: 1;">
-                        <ui:Label text="LITERACY" style="font-size: 9px; color: #556677; letter-spacing: 1px;" />
+                        <ui:Label text="LITERACY" style="font-size: 9px; color: #b7c8de; letter-spacing: 1px;" />
                         <ui:Label name="literacy-value" text=""
-                            style="font-size: 14px; color: #CCCCCC; -unity-font-style: bold;" />
+                            style="font-size: 14px; color: #dce2f3; -unity-font-style: bold;" />
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-grow: 1;">
-                        <ui:Label text="INFRASTRUCTURE" style="font-size: 9px; color: #556677; letter-spacing: 1px;" />
+                        <ui:Label text="INFRASTRUCTURE" style="font-size: 9px; color: #b7c8de; letter-spacing: 1px;" />
                         <ui:Label name="infra-value" text=""
-                            style="font-size: 14px; color: #CCCCCC; -unity-font-style: bold;" />
+                            style="font-size: 14px; color: #dce2f3; -unity-font-style: bold;" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 
                 <ui:VisualElement style="flex-direction: row; margin-bottom: 10px;">
                     <ui:VisualElement style="flex-grow: 1;">
-                        <ui:Label text="CREDIT RATING" style="font-size: 9px; color: #556677; letter-spacing: 1px;" />
+                        <ui:Label text="CREDIT RATING" style="font-size: 9px; color: #b7c8de; letter-spacing: 1px;" />
                         <ui:Label name="credit-value" text=""
-                            style="font-size: 14px; color: #CCCCCC; -unity-font-style: bold;" />
+                            style="font-size: 14px; color: #dce2f3; -unity-font-style: bold;" />
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-grow: 1;">
-                        <ui:Label text="DEBT/GDP" style="font-size: 9px; color: #556677; letter-spacing: 1px;" />
+                        <ui:Label text="DEBT/GDP" style="font-size: 9px; color: #b7c8de; letter-spacing: 1px;" />
                         <ui:Label name="debt-value" text=""
-                            style="font-size: 14px; color: #CCCCCC; -unity-font-style: bold;" />
+                            style="font-size: 14px; color: #dce2f3; -unity-font-style: bold;" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- Borders -->
-                <ui:Label text="BORDERS" style="font-size: 9px; color: #556677; letter-spacing: 1px;
+                <ui:Label text="BORDERS" style="font-size: 9px; color: #b7c8de; letter-spacing: 1px;
                            margin-bottom: 2px;" />
                 <ui:Label name="borders-value" text=""
-                    style="font-size: 11px; color: #8899AA; white-space: normal;
+                    style="font-size: 11px; color: #d2c5b1; white-space: normal;
                            margin-bottom: 4px;" />
             </ui:VisualElement>
 
             <!-- Country Summary -->
-            <ui:VisualElement style="padding: 16px 24px; flex-grow: 1;">
+            <ui:VisualElement style="padding: 16px 24px; flex-grow: 1;
+                                     background-color: #151c27;">
                 <ui:Label name="country-summary" text=""
-                    style="font-size: 12px; color: #8899AA; white-space: normal;
+                    style="font-size: 12px; color: #d2c5b1; white-space: normal;
                            -unity-font-style: italic;" />
             </ui:VisualElement>
 
             <!-- Play Button (bottom-pinned) -->
-            <!-- TODO: Add USS hover effect: background-color rgba(212,168,67,0.25), border-color rgba(212,168,67,0.6) -->
-            <ui:VisualElement style="padding: 12px 24px 20px 24px;">
+            <ui:VisualElement style="padding: 12px 24px 20px 24px;
+                                     background-color: #151c27;">
                 <ui:Button name="play-btn" text=""
                     style="height: 52px;
-                           background-color: rgba(212, 168, 67, 0.15);
-                           color: #D4A843;
+                           background-color: #d4a843;
+                           color: #402d00;
                            -unity-font-style: bold; font-size: 16px;
-                           border-width: 1px; border-color: rgba(212, 168, 67, 0.4);
-                           border-radius: 4px;
+                           border-width: 0;
+                           border-radius: 0px;
                            -unity-text-align: middle-center;
                            letter-spacing: 2px;" />
             </ui:VisualElement>

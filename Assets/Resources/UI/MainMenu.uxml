@@ -3,7 +3,7 @@
     <!-- Fullscreen main menu with background art -->
     <ui:VisualElement name="main-menu-root"
         style="position: absolute; left: 0; top: 0; right: 0; bottom: 0;
-               background-color: #000000;">
+               background-color: #0d141f;">
 
         <!-- Background art (loaded via C#) -->
         <ui:VisualElement name="menu-bg"
@@ -13,13 +13,13 @@
         <!-- Dark gradient overlay for readability -->
         <ui:VisualElement
             style="position: absolute; left: 0; top: 0; right: 0; bottom: 0;
-                   background-color: rgba(0, 0, 0, 0.35);" />
+                   background-color: rgba(13, 20, 31, 0.35);" />
 
         <!-- Left-side content panel -->
         <ui:VisualElement name="menu-content"
             style="position: absolute; left: 0; top: 0; bottom: 0; width: 460px;
-                   background-color: rgba(8, 14, 24, 0.85);
-                   border-right-width: 1px; border-right-color: rgba(212, 168, 67, 0.15);
+                   background-color: rgba(21, 28, 39, 0.85);
+                   border-radius: 0px;
                    flex-direction: column; justify-content: center;
                    padding-left: 48px; padding-right: 48px;">
 
@@ -35,24 +35,24 @@
                 <!-- NEW GAME -->
                 <ui:Button name="new-game-btn" text="New Game"
                     style="height: 48px;
-                           background-color: rgba(212, 168, 67, 0.12);
-                           color: #D4A843; font-size: 18px;
+                           background-color: #d4a843;
+                           color: #402d00; font-size: 18px;
                            -unity-font-style: bold;
-                           border-width: 1px; border-color: rgba(212, 168, 67, 0.4);
-                           border-radius: 4px;
+                           border-width: 0;
+                           border-radius: 0px;
                            margin-bottom: 8px;
                            -unity-text-align: middle-center;
                            letter-spacing: 2px;
-                           transition-property: background-color, border-color;
+                           transition-property: background-color;
                            transition-duration: 0.15s;" />
 
                 <!-- LOAD GAME -->
                 <ui:Button name="load-game-btn" text="Load Game"
                     style="height: 44px;
-                           background-color: rgba(255, 255, 255, 0.03);
-                           color: #CCCCCC; font-size: 16px;
-                           border-width: 1px; border-color: rgba(255, 255, 255, 0.08);
-                           border-radius: 4px;
+                           background-color: rgba(0, 0, 0, 0);
+                           color: #d2c5b1; font-size: 16px;
+                           border-width: 1px; border-color: rgba(154, 143, 125, 0.40);
+                           border-radius: 0px;
                            margin-bottom: 8px;
                            -unity-text-align: middle-center;
                            letter-spacing: 1px;
@@ -62,10 +62,10 @@
                 <!-- SETTINGS -->
                 <ui:Button name="settings-btn" text="Settings"
                     style="height: 44px;
-                           background-color: rgba(255, 255, 255, 0.03);
-                           color: #CCCCCC; font-size: 16px;
-                           border-width: 1px; border-color: rgba(255, 255, 255, 0.08);
-                           border-radius: 4px;
+                           background-color: rgba(0, 0, 0, 0);
+                           color: #d2c5b1; font-size: 16px;
+                           border-width: 1px; border-color: rgba(154, 143, 125, 0.40);
+                           border-radius: 0px;
                            margin-bottom: 8px;
                            -unity-text-align: middle-center;
                            letter-spacing: 1px;
@@ -76,9 +76,9 @@
                 <ui:Button name="exit-btn" text="Exit to Desktop"
                     style="height: 44px;
                            background-color: rgba(0, 0, 0, 0);
-                           color: #667788; font-size: 14px;
+                           color: #d2c5b1; font-size: 14px;
                            border-width: 0;
-                           border-radius: 4px;
+                           border-radius: 0px;
                            margin-top: 12px;
                            -unity-text-align: middle-center;
                            transition-property: color;
@@ -91,13 +91,13 @@
             style="position: absolute; left: 0; right: 0; bottom: 0; height: 36px;
                    flex-direction: row; align-items: center; justify-content: space-between;
                    padding-left: 20px; padding-right: 20px;
-                   background-color: rgba(0, 0, 0, 0.5);">
+                   background-color: rgba(13, 20, 31, 0.5);">
 
             <ui:Label text="v0.1.0 Alpha"
-                style="font-size: 11px; color: #556677;" />
+                style="font-size: 11px; color: #b7c8de;" />
 
-            <ui:Label text="© 2026 — Grand Strategy"
-                style="font-size: 11px; color: #556677;" />
+            <ui:Label text="&#x00A9; 2026 &#x2014; Grand Strategy"
+                style="font-size: 11px; color: #b7c8de;" />
         </ui:VisualElement>
 
     </ui:VisualElement>
