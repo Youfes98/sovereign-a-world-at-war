@@ -24,7 +24,7 @@ Shader "WarStrategy/MapShader"
         _TerrainDesat ("Terrain Desat", Range(0,1)) = 0.10
         _ElevationStrength ("Elevation Relief", Float) = 12.0
         _NoiseStr ("Noise Strength", Float) = 0.012
-        _DetailStrength ("Detail Strength", Float) = 0.08
+        _DetailStrength ("Detail Strength", Float) = 0.12
         _BiomeDetailStrength ("Biome Detail", Float) = 0.30
         _CoastGlowStr ("Coast Glow", Float) = 0.22
 
@@ -496,16 +496,31 @@ Shader "WarStrategy/MapShader"
                         }
                     }
 
-                    // Brushstroke detail overlay (adds painterly texture at close zoom)
+                    // Multi-scale brushstroke detail (stronger at close zoom to mask pixelation)
                     if (_HasDetail > 0.5)
                     {
-                        float detZoom = saturate((_ZoomLevel - 2.0) / 6.0);
-                        if (detZoom > 0.01)
+                        // Medium zoom (3+): broad brushwork
+                        float detZoom1 = saturate((_ZoomLevel - 3.0) / 4.0);
+                        if (detZoom1 > 0.01)
                         {
-                            float det1 = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, terrainUV * 16.0).r;
-                            float det2 = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, terrainUV * 40.0 + 0.5).r;
-                            float detMix = det1 * 0.6 + det2 * 0.4;
-                            col *= lerp(1.0, 0.85 + 0.30 * detMix, _DetailStrength * 3.0 * detZoom);
+                            float det1 = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, terrainUV * 12.0).r;
+                            col *= lerp(1.0, 0.88 + 0.24 * det1, _DetailStrength * 2.5 * detZoom1);
+                        }
+                        // Close zoom (6+): fine brushwork
+                        float detZoom2 = saturate((_ZoomLevel - 6.0) / 4.0);
+                        if (detZoom2 > 0.01)
+                        {
+                            float det2 = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, terrainUV * 32.0 + 0.37).r;
+                            col *= lerp(1.0, 0.85 + 0.30 * det2, _DetailStrength * 3.5 * detZoom2);
+                        }
+                        // Ultra-close zoom (10+): micro texture to completely mask base pixelation
+                        float detZoom3 = saturate((_ZoomLevel - 10.0) / 5.0);
+                        if (detZoom3 > 0.01)
+                        {
+                            float det3 = SAMPLE_TEXTURE2D(_DetailTex, sampler_DetailTex, terrainUV * 80.0 + 0.71).r;
+                            float det4 = smoothNoise(terrainUV * 60.0);
+                            float ultraMix = det3 * 0.5 + det4 * 0.5;
+                            col *= lerp(1.0, 0.82 + 0.36 * ultraMix, _DetailStrength * 4.0 * detZoom3);
                         }
                     }
 
