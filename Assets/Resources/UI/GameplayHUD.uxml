@@ -7,25 +7,25 @@
         <!-- TOP BAR — full width dark bar -->
         <ui:VisualElement name="top-bar"
             picking-mode="Position"
-            style="position: absolute; left: 0; top: 0; right: 0; height: 54px;
+            style="position: absolute; left: 0; top: 0; right: 0; height: 72px;
                    flex-direction: row; align-items: center; justify-content: space-between;
                    background-color: #0C131E;
-                   border-bottom-width: 1px; border-bottom-color: rgba(60, 80, 110, 0.25);
-                   padding-left: 16px; padding-right: 16px;">
+                   border-bottom-width: 2px; border-bottom-color: rgba(80, 110, 140, 0.3);
+                   padding-left: 20px; padding-right: 20px;">
 
             <!-- LEFT SECTION: Flag + Country Name -->
             <ui:VisualElement name="top-left"
                 style="flex-direction: row; align-items: center; flex-shrink: 0;">
 
                 <ui:VisualElement name="player-flag"
-                    style="width: 36px; height: 24px;
-                           border-radius: 2px;
-                           border-width: 1px; border-color: rgba(255,255,255,0.15);
-                           margin-right: 10px;
+                    style="width: 48px; height: 32px;
+                           border-radius: 3px;
+                           border-width: 2px; border-color: rgba(212, 168, 67, 0.4);
+                           margin-right: 14px;
                            overflow: hidden;" />
 
                 <ui:Label name="player-name" text=""
-                    style="font-size: 16px; color: #E8E8E8; -unity-font-style: bold;" />
+                    style="font-size: 20px; color: #E8E8E8; -unity-font-style: bold;" />
             </ui:VisualElement>
 
             <!-- CENTER SECTION: Resource Counters -->
@@ -33,51 +33,51 @@
                 style="flex-direction: row; align-items: center;">
 
                 <!-- Treasury -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 16px; margin-right: 16px;">
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 20px; margin-right: 20px;">
                     <ui:VisualElement name="icon-treasury"
-                        style="width: 22px; height: 22px; margin-right: 6px; -unity-background-scale-mode: scale-to-fit;" />
+                        style="width: 28px; height: 28px; margin-right: 8px; -unity-background-scale-mode: scale-to-fit;" />
                     <ui:Label name="gdp-value" text=""
-                        style="font-size: 15px; color: #D4A843; -unity-font-style: bold;" />
+                        style="font-size: 19px; color: #D4A843; -unity-font-style: bold;" />
                 </ui:VisualElement>
 
-                <ui:VisualElement style="width: 1px; height: 24px; background-color: rgba(255,255,255,0.10);" />
+                <ui:VisualElement style="width: 1px; height: 32px; background-color: rgba(255,255,255,0.10);" />
 
                 <!-- Manpower -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 16px; margin-right: 16px;">
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 20px; margin-right: 20px;">
                     <ui:VisualElement name="icon-manpower"
-                        style="width: 22px; height: 22px; margin-right: 6px; -unity-background-scale-mode: scale-to-fit;" />
+                        style="width: 28px; height: 28px; margin-right: 8px; -unity-background-scale-mode: scale-to-fit;" />
                     <ui:Label name="manpower-value" text=""
-                        style="font-size: 15px; color: #E8E8E8; -unity-font-style: bold;" />
+                        style="font-size: 19px; color: #E8E8E8; -unity-font-style: bold;" />
                 </ui:VisualElement>
 
-                <ui:VisualElement style="width: 1px; height: 24px; background-color: rgba(255,255,255,0.10);" />
+                <ui:VisualElement style="width: 1px; height: 32px; background-color: rgba(255,255,255,0.10);" />
 
                 <!-- Balance -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 16px; margin-right: 16px;">
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 20px; margin-right: 20px;">
                     <ui:VisualElement name="icon-energy"
-                        style="width: 22px; height: 22px; margin-right: 6px; -unity-background-scale-mode: scale-to-fit;" />
+                        style="width: 28px; height: 28px; margin-right: 8px; -unity-background-scale-mode: scale-to-fit;" />
                     <ui:Label name="balance-value" text=""
-                        style="font-size: 15px; color: #4CAF50; -unity-font-style: bold;" />
+                        style="font-size: 19px; color: #4CAF50; -unity-font-style: bold;" />
                 </ui:VisualElement>
 
-                <ui:VisualElement style="width: 1px; height: 24px; background-color: rgba(255,255,255,0.10);" />
+                <ui:VisualElement style="width: 1px; height: 32px; background-color: rgba(255,255,255,0.10);" />
 
                 <!-- Military -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 16px; margin-right: 16px;">
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 20px; margin-right: 20px;">
                     <ui:VisualElement name="icon-military"
-                        style="width: 22px; height: 22px; margin-right: 6px; -unity-background-scale-mode: scale-to-fit;" />
+                        style="width: 28px; height: 28px; margin-right: 8px; -unity-background-scale-mode: scale-to-fit;" />
                     <ui:Label name="military-value" text=""
-                        style="font-size: 15px; color: #E8E8E8; -unity-font-style: bold;" />
+                        style="font-size: 19px; color: #E8E8E8; -unity-font-style: bold;" />
                 </ui:VisualElement>
 
-                <ui:VisualElement style="width: 1px; height: 24px; background-color: rgba(255,255,255,0.10);" />
+                <ui:VisualElement style="width: 1px; height: 32px; background-color: rgba(255,255,255,0.10);" />
 
                 <!-- Stability -->
-                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 16px; margin-right: 16px;">
+                <ui:VisualElement style="flex-direction: row; align-items: center; margin-left: 20px; margin-right: 20px;">
                     <ui:VisualElement name="icon-stability"
-                        style="width: 22px; height: 22px; margin-right: 6px; -unity-background-scale-mode: scale-to-fit;" />
+                        style="width: 28px; height: 28px; margin-right: 8px; -unity-background-scale-mode: scale-to-fit;" />
                     <ui:Label name="stability-value" text=""
-                        style="font-size: 15px; color: #E8E8E8; -unity-font-style: bold;" />
+                        style="font-size: 19px; color: #E8E8E8; -unity-font-style: bold;" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
@@ -87,7 +87,7 @@
 
                 <!-- Date -->
                 <ui:Label name="game-date" text=""
-                    style="font-size: 14px; color: #8899AA; margin-right: 16px;" />
+                    style="font-size: 16px; color: #8899AA; margin-right: 20px;" />
 
                 <!-- Speed Controls -->
                 <ui:VisualElement name="speed-controls"
@@ -97,29 +97,29 @@
                            padding: 3px 4px; margin-right: 8px;">
 
                     <ui:Button name="speed-down-btn" text="&#x25C0;"
-                        style="width: 22px; height: 22px;
-                               background-color: rgba(0,0,0,0); color: #8899AA; font-size: 9px;
+                        style="width: 28px; height: 26px;
+                               background-color: rgba(0,0,0,0); color: #8899AA; font-size: 12px;
                                border-width: 0; -unity-text-align: middle-center;" />
 
                     <ui:Button name="pause-btn" text="II"
-                        style="width: 24px; height: 22px;
-                               background-color: rgba(0,0,0,0); color: #AABBCC; font-size: 11px;
+                        style="width: 30px; height: 26px;
+                               background-color: rgba(0,0,0,0); color: #AABBCC; font-size: 14px;
                                border-width: 0; -unity-text-align: middle-center; -unity-font-style: bold;" />
 
                     <ui:Label name="speed-label" text="1x"
-                        style="font-size: 12px; color: #D4A843; -unity-font-style: bold;
-                               min-width: 24px; -unity-text-align: middle-center;" />
+                        style="font-size: 16px; color: #D4A843; -unity-font-style: bold;
+                               min-width: 30px; -unity-text-align: middle-center;" />
 
                     <ui:Button name="speed-up-btn" text="&#x25B6;"
-                        style="width: 22px; height: 22px;
-                               background-color: rgba(0,0,0,0); color: #8899AA; font-size: 9px;
+                        style="width: 28px; height: 26px;
+                               background-color: rgba(0,0,0,0); color: #8899AA; font-size: 12px;
                                border-width: 0; -unity-text-align: middle-center;" />
                 </ui:VisualElement>
 
                 <!-- Menu -->
                 <ui:Button name="menu-btn" text="&#x2630;"
-                    style="width: 28px; height: 28px;
-                           background-color: rgba(0,0,0,0); color: #667788; font-size: 16px;
+                    style="width: 36px; height: 36px;
+                           background-color: rgba(0,0,0,0); color: #667788; font-size: 22px;
                            border-width: 0; -unity-text-align: middle-center;" />
             </ui:VisualElement>
         </ui:VisualElement>
