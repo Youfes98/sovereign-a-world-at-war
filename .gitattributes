@@ -1,4 +1,4 @@
 Assets/Resources/Map/terrain.png filter=lfs diff=lfs merge=lfs -text
 Assets/Resources/Map/provinces.png filter=lfs diff=lfs merge=lfs -text
-Assets/Resources/Map/heightmap.png filter=lfs diff=lfs merge=lfs -text
 Assets/StreamingAssets/Data/provinces.json filter=lfs diff=lfs merge=lfs -text
+Assets/Resources/Map/heightmap.png filter=lfs diff=lfs merge=lfs -text
