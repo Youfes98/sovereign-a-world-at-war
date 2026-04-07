@@ -21,7 +21,6 @@ namespace WarStrategy.Map
         private SpriteRenderer[] _renderers;
         private int _activeCount;
         private MapCamera _mapCamera;
-        private bool _cameraFound;
 
         // City data
         private struct CityInfo
@@ -113,12 +112,13 @@ namespace WarStrategy.Map
 
         private void LateUpdate()
         {
-            if (!_cameraFound)
+            // Retry camera lookup each frame until found (MapCamera may not exist on first frame)
+            if (_mapCamera == null)
             {
                 _mapCamera = FindAnyObjectByType<MapCamera>();
-                _cameraFound = true;
+                if (_mapCamera == null) return;
             }
-            if (_mapCamera == null || _cities.Count == 0) return;
+            if (_cities.Count == 0) return;
 
             float zoom = _mapCamera.CurrentZoom;
 

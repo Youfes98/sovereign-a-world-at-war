@@ -266,7 +266,7 @@ namespace WarStrategy.Map
                 {
                     if (poolIdx >= POOL_SIZE) break;
 
-                    Vector3 worldPos = new(entry.Position.x + xOff, -entry.Position.y, 0);
+                    Vector3 worldPos = new(entry.Position.x + xOff, -entry.Position.y, -2f);
 
                     // Frustum cull
                     if (!viewRect.Contains(new Vector2(worldPos.x, worldPos.y)))
@@ -309,7 +309,7 @@ namespace WarStrategy.Map
                     float shadowOff = Mathf.Max(1f, fontSize * 0.08f);
                     shadow.text = text;
                     shadow.fontSize = fontSize;
-                    shadow.transform.position = worldPos + new Vector3(shadowOff, -shadowOff, 0.01f);
+                    shadow.transform.position = worldPos + new Vector3(shadowOff, -shadowOff, 0.1f);
 
                     // Scale labels inversely with zoom so they stay readable
                     label.transform.localScale = Vector3.one * labelScale;
@@ -343,7 +343,7 @@ namespace WarStrategy.Map
                     {
                         if (cityPoolIdx >= CITY_POOL_SIZE) break;
 
-                        Vector3 worldPos = new(city.Position.x + xOff, -city.Position.y, 0);
+                        Vector3 worldPos = new(city.Position.x + xOff, -city.Position.y, -2f);
 
                         // Frustum cull
                         if (!viewRect.Contains(new Vector2(worldPos.x, worldPos.y)))
@@ -386,7 +386,7 @@ namespace WarStrategy.Map
                         float shadowOff = Mathf.Max(1f, cityBaseSize * 0.08f);
                         shadow.text = city.DisplayText;
                         shadow.fontSize = cityBaseSize;
-                        shadow.transform.position = worldPos + new Vector3(shadowOff, -shadowOff, 0.01f);
+                        shadow.transform.position = worldPos + new Vector3(shadowOff, -shadowOff, 0.1f);
 
                         // Scale labels inversely with zoom so they stay readable
                         label.transform.localScale = Vector3.one * labelScale;
