@@ -59,7 +59,7 @@ namespace WarStrategy.Map
             var tex = Resources.Load<Texture2D>(path);
             if (tex == null) return null;
             return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
-                new Vector2(0.5f, 0.5f), 1f); // PPU=1 so sprite size = world units
+                new Vector2(0.5f, 0.5f), 4f); // PPU=4: 48px sprite = 12 world units base
         }
 
         private void BuildPool()
@@ -145,12 +145,12 @@ namespace WarStrategy.Map
             float viewTop = camY + halfH + 300;
             float viewBottom = camY - halfH - 300;
 
-            // WORLD-SIZE logic — buildings are sized in world units, not pixels
-            // At zoom 5 = 20 units, at zoom 8 = 60 units (intentionally over-scaled for readability)
-            float baseWorldSize = Mathf.Lerp(20f, 60f, zoomT);
+            // Scale based on zoom — visible but not overwhelming
+            // At PPU=4, sprite is 12 world units base. Scale 1-4x.
+            float baseScale = Mathf.Lerp(1.0f, 3.5f, zoomT);
 
-            // Minimum on-screen size — cities ALWAYS visible (V3 trick)
-            float minScreenSize = halfH * 0.015f;
+            // Minimum on-screen size — cities always visible
+            float minScale = halfH * 0.003f;
 
             int active = 0;
             for (int i = 0; i < _cities.Count && active < POOL_SIZE; i++)
@@ -182,9 +182,9 @@ namespace WarStrategy.Map
                     popMult = 1.0f;
                 }
 
-                // Final size: max of world size and min screen size
-                float worldSize = baseWorldSize * popMult;
-                float finalSize = Mathf.Max(worldSize, minScreenSize);
+                // Final size
+                float size = baseScale * popMult;
+                float finalSize = Mathf.Max(size, minScale);
 
                 // Fade + scale together (no pop-in)
                 float fadeScale = Mathf.Lerp(0.3f, 1f, zoomT);
