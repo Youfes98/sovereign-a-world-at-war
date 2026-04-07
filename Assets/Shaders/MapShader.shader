@@ -380,34 +380,14 @@ Shader "WarStrategy/MapShader"
                         col *= lerp(1.0, uwL, (1.0 - waterDepth) * 0.5);
                     }
 
-                    // Wave normal map (dual scroll for organic movement)
-                    if (_HasWaveNormal > 0.5)
-                    {
-                        float2 wUV1 = uv * _WaveScale + float2(t * 0.35, t * 0.25);
-                        float2 wUV2 = uv * (_WaveScale * 1.7) + float2(-t * 0.2, t * 0.4);
-                        float3 wn1 = SAMPLE_TEXTURE2D(_WaveNormalTex, sampler_WaveNormalTex, wUV1).rgb * 2.0 - 1.0;
-                        float3 wn2 = SAMPLE_TEXTURE2D(_WaveNormalTex, sampler_WaveNormalTex, wUV2).rgb * 2.0 - 1.0;
-                        float3 waveN = normalize(float3((wn1.xy + wn2.xy) * 0.5, 1.0));
+                    // Simple clean waves — 2-layer sin + specular
+                    float wave1 = sin(uv.x * 200.0 + t * 4.0) * 0.5 + 0.5;
+                    float wave2 = sin(uv.y * 280.0 - t * 3.0) * 0.5 + 0.5;
+                    col += (wave1 + wave2 - 1.0) * 0.015 * (1.0 - waterDepth);
 
-                        // Specular from wave normals (sun glint)
-                        float2 sunDir2D = normalize(float2(-0.5, 0.3));
-                        float waveSpec = pow(saturate(dot(waveN.xy, sunDir2D) * 0.5 + 0.5), 32.0) * 0.25;
-                        waveSpec *= (1.0 - waterDepth * 0.5); // stronger in shallows
-                        col += float3(waveSpec, waveSpec * 0.96, waveSpec * 0.88);
-
-                        // Subtle wave color distortion
-                        col += (waveN.x * 0.008 + waveN.y * 0.005) * (1.0 - waterDepth);
-                    }
-                    else
-                    {
-                        // Fallback: procedural waves
-                        float w1 = smoothNoise(uv * 30.0 + float2(t, t * 0.7));
-                        float w2 = smoothNoise(uv * 55.0 + float2(-t * 0.6, t * 0.4));
-                        col += (w1 * 0.6 + w2 * 0.4 - 0.5) * lerp(0.04, 0.08, 1.0 - waterDepth);
-                        // Procedural specular
-                        float specN = smoothNoise(uv * 80.0 + float2(t * 0.5, t * 0.3));
-                        col += pow(saturate(specN * 1.2 - 0.1), 4.0) * 0.18;
-                    }
+                    // Subtle specular
+                    float specN = smoothNoise(uv * 60.0 + float2(t * 0.4, t * 0.3));
+                    col += pow(saturate(specN * 1.2 - 0.1), 6.0) * 0.08;
 
                     // Coast detection
                     float coastDist = 0.0;
@@ -547,6 +527,47 @@ Shader "WarStrategy/MapShader"
                             float det4 = smoothNoise(terrainUV * 60.0);
                             float ultraMix = det3 * 0.5 + det4 * 0.5;
                             col *= lerp(1.0, 0.82 + 0.36 * ultraMix, _DetailStrength * 4.0 * detZoom3);
+                        }
+                    }
+
+                    // ── V3-style biome contrast layers (zoom 6+) ──
+                    float biomeZoom = saturate((_ZoomLevel - 6.0) / 3.0);
+                    if (biomeZoom > 0.01 && _HasTerrainTypes > 0.5)
+                    {
+                        // Zoom-gated UV scaling — detail gets "higher-res" as you zoom in
+                        float uvScale = lerp(1.0, 8.0, biomeZoom);
+                        float2 detailUV = terrainUV * uvScale;
+
+                        int detBiome = clamp((int)(cachedTerrainType * 5.0 + 0.5), 0, 5);
+
+                        // Forest: visible "tree blob" shadows
+                        if (detBiome == 1 || detBiome == 5)
+                        {
+                            float trees = step(0.55, smoothNoise(detailUV * 3.0) * 1.5);
+                            col *= lerp(1.0, 0.72, trees * biomeZoom * 0.6);
+                        }
+
+                        // Plains: farmland grid pattern (HUGE for V3 look)
+                        if (detBiome == 0)
+                        {
+                            float gridX = sin(detailUV.x * 0.8);
+                            float gridY = sin(detailUV.y * 0.8);
+                            float farms = step(0.3, gridX * gridY);
+                            col = lerp(col, col * 1.15, farms * biomeZoom * 0.15);
+                        }
+
+                        // Desert: sand ripple lines
+                        if (detBiome == 3)
+                        {
+                            float ripples = sin(detailUV.x * 1.5 + smoothNoise(detailUV * 0.5) * 2.0);
+                            col *= 1.0 + ripples * 0.04 * biomeZoom;
+                        }
+
+                        // Mountain: rocky crag contrast
+                        if (detBiome == 2)
+                        {
+                            float crags = smoothNoise(detailUV * 4.0);
+                            col *= lerp(1.0, 0.78, step(0.6, crags) * biomeZoom * 0.4);
                         }
                     }
 

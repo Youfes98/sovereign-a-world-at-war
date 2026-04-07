@@ -59,7 +59,7 @@ namespace WarStrategy.Map
             var tex = Resources.Load<Texture2D>(path);
             if (tex == null) return null;
             return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),
-                new Vector2(0.5f, 0.5f), 100f);
+                new Vector2(0.5f, 0.5f), 1f); // PPU=1 so sprite size = world units
         }
 
         private void BuildPool()
@@ -129,8 +129,8 @@ namespace WarStrategy.Map
                 return;
             }
 
-            // Calculate visibility and alpha
-            float alpha = Mathf.Clamp01((zoom - ZOOM_THRESHOLD) / (ZOOM_FULL - ZOOM_THRESHOLD));
+            // Smooth transition: 0 at threshold, 1 at full
+            float zoomT = Mathf.Clamp01((zoom - ZOOM_THRESHOLD) / (ZOOM_FULL - ZOOM_THRESHOLD));
 
             // Get viewport bounds
             Camera cam = _mapCamera.Camera;
@@ -140,13 +140,17 @@ namespace WarStrategy.Map
             float camX = cam.transform.position.x;
             float camY = cam.transform.position.y;
 
-            float viewLeft = camX - halfW - 200; // padding
-            float viewRight = camX + halfW + 200;
-            float viewTop = camY + halfH + 200;
-            float viewBottom = camY - halfH - 200;
+            float viewLeft = camX - halfW - 300;
+            float viewRight = camX + halfW + 300;
+            float viewTop = camY + halfH + 300;
+            float viewBottom = camY - halfH - 300;
 
-            // Sprite scale based on zoom
-            float spriteScale = Mathf.Lerp(8f, 3f, Mathf.Clamp01((zoom - ZOOM_THRESHOLD) / 15f));
+            // WORLD-SIZE logic — buildings are sized in world units, not pixels
+            // At zoom 5 = 20 units, at zoom 8 = 60 units (intentionally over-scaled for readability)
+            float baseWorldSize = Mathf.Lerp(20f, 60f, zoomT);
+
+            // Minimum on-screen size — cities ALWAYS visible (V3 trick)
+            float minScreenSize = halfH * 0.015f;
 
             int active = 0;
             for (int i = 0; i < _cities.Count && active < POOL_SIZE; i++)
@@ -159,32 +163,41 @@ namespace WarStrategy.Map
                 if (cx < viewLeft || cx > viewRight || cy < viewBottom || cy > viewTop)
                     continue;
 
-                // Select sprite by population
+                // Population-based size multiplier
+                float popMult;
                 Sprite spr;
-                float scale;
                 if (city.Population > 10_000_000)
                 {
                     spr = _sprLarge;
-                    scale = spriteScale * 1.5f;
+                    popMult = 1.8f;
                 }
                 else if (city.Population > 1_000_000)
                 {
                     spr = _sprMedium;
-                    scale = spriteScale * 1.2f;
+                    popMult = 1.3f;
                 }
                 else
                 {
                     spr = _sprSmall;
-                    scale = spriteScale;
+                    popMult = 1.0f;
                 }
+
+                // Final size: max of world size and min screen size
+                float worldSize = baseWorldSize * popMult;
+                float finalSize = Mathf.Max(worldSize, minScreenSize);
+
+                // Fade + scale together (no pop-in)
+                float fadeScale = Mathf.Lerp(0.3f, 1f, zoomT);
+                finalSize *= fadeScale;
 
                 var go = _pool[active];
                 var sr = _renderers[active];
                 go.SetActive(true);
-                go.transform.localPosition = new Vector3(cx, cy, -1f); // Z=-1 above map
-                go.transform.localScale = new Vector3(scale, scale, 1f);
+                go.transform.localPosition = new Vector3(cx, cy, -2f); // Z=-2 in front of map
+                go.transform.localScale = new Vector3(finalSize, finalSize, 1f);
                 sr.sprite = spr;
-                sr.color = new Color(1f, 1f, 1f, alpha);
+                sr.color = new Color(1f, 1f, 1f, zoomT);
+                sr.sortingOrder = 1000; // always on top
                 active++;
             }
 
