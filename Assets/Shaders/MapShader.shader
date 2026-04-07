@@ -216,7 +216,7 @@ Shader "WarStrategy/MapShader"
                 float3 tundra_lo  = float3(0.78, 0.80, 0.84); float3 tundra_hi  = float3(0.90, 0.92, 0.94);
                 float3 jungle_lo  = float3(0.12, 0.42, 0.12); float3 jungle_hi  = float3(0.25, 0.60, 0.25);
 
-                int biome = clamp((int)(terrainTypeRaw * 255.0 + 0.5), 0, 5);
+                int biome = clamp((int)(terrainTypeRaw * 5.0 + 0.5), 0, 5);
                 float h = saturate(height);
 
                 float3 col;
@@ -489,7 +489,7 @@ Shader "WarStrategy/MapShader"
                         // Reuse cached terrain type if available, otherwise sample
                         float ttRaw = cachedTerrainType >= 0.0 ? cachedTerrainType :
                             SAMPLE_TEXTURE2D(_TerrainTypeTex, sampler_TerrainTypeTex, terrainUV).r;
-                        float tt = ttRaw * 255.0;
+                        float tt = ttRaw * 5.0;
                         int bi = clamp((int)(tt + 0.5), 0, 5);
                         float ac = (float)(bi % 3);
                         float ar = (float)(bi / 3);

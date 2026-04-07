@@ -117,6 +117,13 @@ namespace WarStrategy.Core
                 var labelGo = new GameObject("LabelRenderer");
                 labelGo.AddComponent<LabelRenderer>();
             }
+
+            // CityDetailRenderer (building sprites at close zoom)
+            if (FindAnyObjectByType<CityDetailRenderer>() == null)
+            {
+                var cityGo = new GameObject("CityDetailRenderer");
+                cityGo.AddComponent<CityDetailRenderer>();
+            }
         }
 
         IEnumerator WireClickHandler()
@@ -243,6 +250,11 @@ namespace WarStrategy.Core
                         cityCount++;
                     }
                 }
+
+                // Feed city data to CityDetailRenderer (building sprites)
+                var cityDetailRenderer = FindAnyObjectByType<CityDetailRenderer>();
+                if (cityDetailRenderer != null)
+                    cityDetailRenderer.SetCities(gameState.Countries);
 
 #if UNITY_EDITOR
                 Debug.Log($"[SceneSetup] Fed {labelData.Count} country labels, {cityCount} city labels.");
