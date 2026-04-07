@@ -380,14 +380,34 @@ Shader "WarStrategy/MapShader"
                         col *= lerp(1.0, uwL, (1.0 - waterDepth) * 0.5);
                     }
 
-                    // Simple clean waves — 2-layer sin + specular
-                    float wave1 = sin(uv.x * 200.0 + t * 4.0) * 0.5 + 0.5;
-                    float wave2 = sin(uv.y * 280.0 - t * 3.0) * 0.5 + 0.5;
-                    col += (wave1 + wave2 - 1.0) * 0.015 * (1.0 - waterDepth);
+                    // Wave normal map (dual scroll for organic movement)
+                    if (_HasWaveNormal > 0.5)
+                    {
+                        float2 wUV1 = uv * _WaveScale + float2(t * 0.35, t * 0.25);
+                        float2 wUV2 = uv * (_WaveScale * 1.7) + float2(-t * 0.2, t * 0.4);
+                        float3 wn1 = SAMPLE_TEXTURE2D(_WaveNormalTex, sampler_WaveNormalTex, wUV1).rgb * 2.0 - 1.0;
+                        float3 wn2 = SAMPLE_TEXTURE2D(_WaveNormalTex, sampler_WaveNormalTex, wUV2).rgb * 2.0 - 1.0;
+                        float3 waveN = normalize(float3((wn1.xy + wn2.xy) * 0.5, 1.0));
 
-                    // Subtle specular
-                    float specN = smoothNoise(uv * 60.0 + float2(t * 0.4, t * 0.3));
-                    col += pow(saturate(specN * 1.2 - 0.1), 6.0) * 0.08;
+                        // Specular from wave normals (sun glint)
+                        float2 sunDir2D = normalize(float2(-0.5, 0.3));
+                        float waveSpec = pow(saturate(dot(waveN.xy, sunDir2D) * 0.5 + 0.5), 32.0) * 0.25;
+                        waveSpec *= (1.0 - waterDepth * 0.5);
+                        col += float3(waveSpec, waveSpec * 0.96, waveSpec * 0.88);
+
+                        // Surface perturbation from normals
+                        col += (waveN.x * 0.008 + waveN.y * 0.005) * (1.0 - waterDepth);
+                    }
+                    else
+                    {
+                        // Fallback: procedural waves when no normal map loaded
+                        float w1 = smoothNoise(uv * 30.0 + float2(t, t * 0.7));
+                        float w2 = smoothNoise(uv * 55.0 + float2(-t * 0.6, t * 0.4));
+                        col += (w1 * 0.6 + w2 * 0.4 - 0.5) * lerp(0.04, 0.08, 1.0 - waterDepth);
+                        // Procedural specular
+                        float specN = smoothNoise(uv * 80.0 + float2(t * 0.5, t * 0.3));
+                        col += pow(saturate(specN * 1.2 - 0.1), 4.0) * 0.18;
+                    }
 
                     // Coast detection
                     float coastDist = 0.0;
