@@ -58,6 +58,8 @@ namespace WarStrategy.Core
         /// Wires renderers only when both GameState and ProvinceDB have finished loading.
         /// </summary>
         private bool _wired = false;
+        private bool _labelsDirty = false;
+
         private void TryWireData()
         {
             if (_wired) return;
@@ -70,6 +72,59 @@ namespace WarStrategy.Core
 
             _wired = true;
             WireDataToRenderers();
+
+            // Subscribe to territory changes for dynamic label recalculation
+            gameState.TerritoryChanged += OnTerritoryChanged;
+        }
+
+        private void OnTerritoryChanged(string provinceId, string oldOwner, string newOwner)
+        {
+            _labelsDirty = true;
+        }
+
+        private void LateUpdate()
+        {
+            if (!_labelsDirty || !_wired) return;
+            _labelsDirty = false;
+            RebuildLabels();
+        }
+
+        private void RebuildLabels()
+        {
+            var gameState = Services.GameState;
+            var provinceDB = Services.ProvinceDB;
+            var labelRenderer = FindAnyObjectByType<LabelRenderer>();
+            if (labelRenderer == null || gameState == null || provinceDB == null) return;
+
+            var labelData = new List<(string iso, string name, Vector2 centroid, float area, bool isPlayer, float boundsWidth)>();
+
+            foreach (var kvp in gameState.Countries)
+            {
+                var c = kvp.Value;
+                var (boundsCenter, boundsSize) = provinceDB.GetCountryBounds(c.Iso);
+                Vector2 centroid = boundsCenter;
+                if (centroid == Vector2.zero)
+                {
+                    centroid = c.Centroid;
+                    if (centroid == Vector2.zero)
+                        centroid = provinceDB.GetCentroid(c.Iso);
+                }
+
+                float totalArea = 0f;
+                if (provinceDB.CountryProvinces.TryGetValue(c.Iso, out var provIds))
+                {
+                    foreach (var pid in provIds)
+                    {
+                        if (provinceDB.Provinces.TryGetValue(pid, out var prov))
+                            totalArea += prov.AreaKm2;
+                    }
+                }
+
+                if (centroid != Vector2.zero)
+                    labelData.Add((c.Iso, c.Name, centroid, totalArea, c.Iso == gameState.PlayerIso, boundsSize.x));
+            }
+
+            labelRenderer.SetCountryData(labelData);
         }
 
         void SetupCamera()
@@ -209,17 +264,24 @@ namespace WarStrategy.Core
                 borderRenderer.PopulateOwnerLUT(mapRenderer, provinceDB, gameState);
             }
 
-            // ── Feed label data ──
+            // ── Feed label data (with territory bounds for spanning) ──
             if (labelRenderer != null && gameState != null && provinceDB != null)
             {
-                var labelData = new List<(string iso, string name, Vector2 centroid, float area, bool isPlayer)>();
+                var labelData = new List<(string iso, string name, Vector2 centroid, float area, bool isPlayer, float boundsWidth)>();
 
                 foreach (var kvp in gameState.Countries)
                 {
                     var c = kvp.Value;
-                    Vector2 centroid = c.Centroid;
+
+                    // Use bounds center as centroid (more accurate for label placement)
+                    var (boundsCenter, boundsSize) = provinceDB.GetCountryBounds(c.Iso);
+                    Vector2 centroid = boundsCenter;
                     if (centroid == Vector2.zero)
-                        centroid = provinceDB.GetCentroid(c.Iso);
+                    {
+                        centroid = c.Centroid;
+                        if (centroid == Vector2.zero)
+                            centroid = provinceDB.GetCentroid(c.Iso);
+                    }
 
                     float totalArea = 0f;
                     if (provinceDB.CountryProvinces.TryGetValue(c.Iso, out var provIds))
@@ -233,7 +295,7 @@ namespace WarStrategy.Core
 
                     if (centroid != Vector2.zero)
                     {
-                        labelData.Add((c.Iso, c.Name, centroid, totalArea, c.Iso == gameState.PlayerIso));
+                        labelData.Add((c.Iso, c.Name, centroid, totalArea, c.Iso == gameState.PlayerIso, boundsSize.x));
                     }
                 }
 
@@ -275,7 +337,10 @@ namespace WarStrategy.Core
 
             var gameState = Services.GameState;
             if (gameState != null)
+            {
                 gameState.OnCountryDataLoaded -= OnAnyDataLoaded;
+                gameState.TerritoryChanged -= OnTerritoryChanged;
+            }
         }
     }
 }
