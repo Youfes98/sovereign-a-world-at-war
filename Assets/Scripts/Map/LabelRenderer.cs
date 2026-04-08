@@ -20,10 +20,10 @@ namespace WarStrategy.Map
         public const float CITY_ZOOM_THRESHOLD = 3f;
 
         [Header("Colors")]
-        public Color TextColor = new(0.08f, 0.06f, 0.04f, 0.55f);     // dark, semi-transparent — embedded in map
-        public Color ShadowColor = new(1f, 1f, 1f, 0.12f);             // faint white underlay for legibility
-        public Color PlayerColor = new(0.05f, 0.03f, 0.0f, 0.65f);     // slightly darker for player
-        public Color CityTextColor = new(0.12f, 0.10f, 0.08f, 0.70f);  // dark, readable
+        public Color TextColor = new(0.06f, 0.05f, 0.03f, 0.82f);     // bold dark, clearly readable
+        public Color ShadowColor = new(1f, 1f, 1f, 0.18f);             // white underlay for legibility
+        public Color PlayerColor = new(0.04f, 0.02f, 0.0f, 0.90f);     // bolder for player
+        public Color CityTextColor = new(0.10f, 0.08f, 0.06f, 0.80f);  // dark, readable
 
         private MapCamera _mapCamera;
         private TMP_FontAsset _font;
