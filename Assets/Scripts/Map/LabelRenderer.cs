@@ -220,9 +220,9 @@ namespace WarStrategy.Map
 
             float[] xOffsets = { -MAP_WIDTH, 0f, MAP_WIDTH };
 
-            // Screen-size clamps: labels stay between 1.5% and 6% of viewport height
-            float minFontSize = viewportHeight * 0.015f;
-            float maxFontSize = viewportHeight * 0.06f;
+            // Screen-size clamps: labels stay between 3% and 10% of viewport height
+            float minFontSize = viewportHeight * 0.03f;
+            float maxFontSize = viewportHeight * 0.10f;
 
             foreach (var entry in _entries)
             {
@@ -239,7 +239,7 @@ namespace WarStrategy.Map
                 // Text should fill ~70% of country width
                 // Cap BoundsWidth to prevent absurd sizes (Russia wraps the globe)
                 float bw = Mathf.Min(entry.BoundsWidth, MAP_WIDTH * 0.35f);
-                float targetWidth = bw * 0.7f;
+                float targetWidth = bw * 0.85f;
                 float charFactor = Mathf.Max(text.Length * 0.65f, 1f);
                 float fontSizeFromTerritory = targetWidth / charFactor;
 
@@ -292,8 +292,8 @@ namespace WarStrategy.Map
                     label.characterSpacing = 12f;
                     label.fontStyle = FontStyles.Bold;
                     label.color = entry.IsPlayer ? PlayerColor : TextColor;
-                    label.outlineWidth = 0.3f;
-                    label.outlineColor = new Color32(10, 15, 25, 200);
+                    label.outlineWidth = 0.45f;
+                    label.outlineColor = new Color32(8, 12, 20, 230);
                     label.transform.position = worldPos;
                     label.transform.localScale = Vector3.one; // NO 1/zoom scaling
 
