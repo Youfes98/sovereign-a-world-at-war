@@ -252,10 +252,9 @@ namespace WarStrategy.Core
                     }
                 }
 
-                // Disabled: building sprites not active
-                // var cityDetailRenderer = FindAnyObjectByType<CityDetailRenderer>();
-                // if (cityDetailRenderer != null)
-                //     cityDetailRenderer.SetCities(gameState.Countries);
+                // Generate GPU city mask for shader-driven markers (replaces CityDetailRenderer)
+                if (mapRenderer != null)
+                    mapRenderer.GenerateCityMask(gameState.Countries);
 
 #if UNITY_EDITOR
                 Debug.Log($"[SceneSetup] Fed {labelData.Count} country labels, {cityCount} city labels.");

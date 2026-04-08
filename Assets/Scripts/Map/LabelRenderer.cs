@@ -220,8 +220,8 @@ namespace WarStrategy.Map
 
             int poolIdx = 0;
 
-            // Calculate zoom-responsive font size
-            float baseSize = Mathf.Clamp(8f + 6f * Mathf.Log(zoom + 0.5f, 2f), 6f, 20f);
+            // Calculate zoom-responsive font size (larger = more readable, HOI4 style)
+            float baseSize = Mathf.Clamp(12f + 8f * Mathf.Log(zoom + 0.5f, 2f), 10f, 36f);
 
             // Get viewport bounds in world space for culling
             float halfH = cam.orthographicSize;
@@ -246,7 +246,7 @@ namespace WarStrategy.Map
 
                 // Font adjustments for small countries
                 float fontSize = baseSize;
-                string text = entry.Name;
+                string text = entry.Name.ToUpper(); // HOI4/V3 style: always uppercase
 
                 if (screenArea < 600f)
                 {
@@ -303,12 +303,16 @@ namespace WarStrategy.Map
 
                     label.text = text;
                     label.fontSize = fontSize;
+                    label.characterSpacing = 8f; // wide spacing like HOI4/V3 map labels
+                    label.fontStyle = FontStyles.Bold;
                     label.color = entry.IsPlayer ? PlayerColor : TextColor;
                     label.transform.position = worldPos;
 
                     float shadowOff = Mathf.Max(1f, fontSize * 0.08f);
                     shadow.text = text;
                     shadow.fontSize = fontSize;
+                    shadow.characterSpacing = 8f;
+                    shadow.fontStyle = FontStyles.Bold;
                     shadow.transform.position = worldPos + new Vector3(shadowOff, -shadowOff, 0.1f);
 
                     // Scale labels inversely with zoom so they stay readable

@@ -289,7 +289,14 @@ namespace WarStrategy.Map
                     _cameraSearchDone = true;
                 }
                 if (_mapCameraRef != null)
-                    _mapMaterial.SetFloat("_ZoomLevel", _mapCameraRef.CurrentZoom);
+                {
+                    float zoom = _mapCameraRef.CurrentZoom;
+                    _mapMaterial.SetFloat("_ZoomLevel", zoom);
+
+                    // City markers: fade in at zoom 5-8
+                    float cityVis = Mathf.SmoothStep(0f, 1f, (zoom - 5f) / 3f);
+                    _mapMaterial.SetFloat("_CityVisibility", cityVis);
+                }
             }
 
             UpdateTileVisibility();
@@ -345,6 +352,69 @@ namespace WarStrategy.Map
                 _mapMaterial.SetFloat("_PlayerOwnerValue", ownerValue);
         }
 
+        // ── City Mask (GPU-driven city markers) ──
+
+        private Texture2D _cityMask;
+
+        /// <summary>
+        /// Generate a city mask texture from capital positions. White dots at city UVs.
+        /// Gaussian splat so each city is a soft glow, not a single pixel.
+        /// Population scales the brightness (bigger city = bigger glow).
+        /// </summary>
+        public void GenerateCityMask(Dictionary<string, CountryData> countries)
+        {
+            const int W = 1024, H = 512;
+            _cityMask = new Texture2D(W, H, TextureFormat.R8, false);
+            _cityMask.filterMode = FilterMode.Bilinear;
+            _cityMask.wrapMode = TextureWrapMode.Repeat;
+
+            var pixels = new byte[W * H];
+
+            foreach (var kvp in countries)
+            {
+                var c = kvp.Value;
+                if (c.CapitalCentroid == Vector2.zero) continue;
+
+                // Convert map coords to UV (same as LabelRenderer: x/MAP_WIDTH, 1 - y/MAP_HEIGHT)
+                float u = c.CapitalCentroid.x / MAP_WIDTH;
+                float v = 1f - (c.CapitalCentroid.y / MAP_HEIGHT);
+
+                int cx = Mathf.Clamp(Mathf.RoundToInt(u * W), 0, W - 1);
+                int cy = Mathf.Clamp(Mathf.RoundToInt(v * H), 0, H - 1);
+
+                // Radius based on population (2-6 pixels)
+                float popFactor = Mathf.Log10(Mathf.Max(c.Population, 1000f)) - 3f; // 0 at 1k, 6 at 1B
+                int radius = Mathf.Clamp(Mathf.RoundToInt(1.5f + popFactor * 0.8f), 2, 6);
+                float brightness = Mathf.Clamp01(0.4f + popFactor * 0.1f);
+
+                // Gaussian splat
+                for (int dy = -radius; dy <= radius; dy++)
+                {
+                    for (int dx = -radius; dx <= radius; dx++)
+                    {
+                        int px = (cx + dx + W) % W; // wrap X
+                        int py = Mathf.Clamp(cy + dy, 0, H - 1);
+                        float dist = Mathf.Sqrt(dx * dx + dy * dy) / radius;
+                        if (dist > 1f) continue;
+                        float falloff = 1f - dist * dist; // soft falloff
+                        byte val = (byte)(brightness * falloff * 255f);
+                        int idx = py * W + px;
+                        if (val > pixels[idx]) pixels[idx] = val; // max blend
+                    }
+                }
+            }
+
+            _cityMask.SetPixelData(pixels, 0);
+            _cityMask.Apply();
+
+            _mapMaterial.SetTexture("_CityMaskTex", _cityMask);
+            _mapMaterial.SetFloat("_HasCityMask", 1f);
+
+#if UNITY_EDITOR
+            Debug.Log($"[MapRenderer] City mask generated: {W}x{H}, {countries.Count} cities");
+#endif
+        }
+
         // ── Public access ──
 
         private void OnDestroy()
@@ -353,6 +423,7 @@ namespace WarStrategy.Map
             if (_colorLUT != null) Destroy(_colorLUT);
             if (_countryLUT != null) Destroy(_countryLUT);
             if (_ownerLUT != null) Destroy(_ownerLUT);
+            if (_cityMask != null) Destroy(_cityMask);
         }
 
         public Texture2D ProvinceTexture => _provinceTex;

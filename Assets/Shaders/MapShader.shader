@@ -15,8 +15,11 @@ Shader "WarStrategy/MapShader"
         _BiomeAtlas ("Biome Atlas", 2D) = "gray" {}
         _WaveNormalTex ("Wave Normal Map", 2D) = "bump" {}
         _WaveScale ("Wave Scale", Float) = 8.0
+        _CityMaskTex ("City Mask", 2D) = "black" {}
+        _CityVisibility ("City Visibility", Float) = 0.0
 
         [Toggle] _HasTerrain ("Has Terrain", Float) = 0
+        [Toggle] _HasCityMask ("Has City Mask", Float) = 0
         [Toggle] _HasWaveNormal ("Has Wave Normal", Float) = 0
         [Toggle] _HasHeightmap ("Has Heightmap", Float) = 0
         [Toggle] _HasNoise ("Has Noise", Float) = 0
@@ -105,14 +108,16 @@ Shader "WarStrategy/MapShader"
             TEXTURE2D(_BiomeAtlas);     SAMPLER(sampler_BiomeAtlas);
             TEXTURE2D(_OwnerLUT);       SAMPLER(sampler_OwnerLUT);
             TEXTURE2D(_WaveNormalTex);  SAMPLER(sampler_WaveNormalTex);
+            TEXTURE2D(_CityMaskTex);   SAMPLER(sampler_CityMaskTex);
 
             CBUFFER_START(UnityPerMaterial)
                 float _LUTWidth;
                 float4 _ProvinceTex_TexelSize;
                 float4 _HeightmapTex_TexelSize;
 
-                float _HasTerrain, _HasHeightmap, _HasNoise, _HasDetail, _HasTerrainTypes, _HasWaveNormal;
+                float _HasTerrain, _HasHeightmap, _HasNoise, _HasDetail, _HasTerrainTypes, _HasWaveNormal, _HasCityMask;
                 float _WaveScale;
+                float _CityVisibility;
                 float _CountryColorStr, _TerrainDesat, _ElevationStrength;
                 float _NoiseStr, _DetailStrength, _BiomeDetailStrength, _CoastGlowStr;
 
@@ -441,8 +446,9 @@ Shader "WarStrategy/MapShader"
                     float3 countryCol = LookupColor(idx);
 
                     // Zoom-based political→terrain transition
+                    // Country color never fully disappears — keeps 25% tint at max zoom (HOI4 style)
                     float zoomFade = 1.0 - saturate((_ZoomLevel - _ZoomTerrainStart) / (_ZoomTerrainEnd - _ZoomTerrainStart));
-                    float colorStr = _CountryColorStr * zoomFade;
+                    float colorStr = _CountryColorStr * lerp(0.25, 1.0, zoomFade);
 
                     // Step 1: Blend terrain texture with procedural biome coloring
                     float3 biomeBase = terrain;
@@ -560,20 +566,21 @@ Shader "WarStrategy/MapShader"
 
                         int detBiome = clamp((int)(cachedTerrainType * 5.0 + 0.5), 0, 5);
 
-                        // Forest: visible "tree blob" shadows
+                        // Forest: chunky tree mass (low-freq noise = readable shapes, not speckle)
                         if (detBiome == 1 || detBiome == 5)
                         {
-                            float trees = step(0.55, smoothNoise(detailUV * 3.0) * 1.5);
-                            col *= lerp(1.0, 0.72, trees * biomeZoom * 0.6);
+                            float forestLarge = smoothNoise(detailUV * 0.5);
+                            float forestMask = step(0.6, forestLarge);
+                            col *= lerp(1.0, 0.65, forestMask * biomeZoom * 0.6);
                         }
 
-                        // Plains: farmland grid pattern (HUGE for V3 look)
+                        // Plains: farmland grid (high-freq + hard step = human activity, not texture)
                         if (detBiome == 0)
                         {
-                            float gridX = sin(detailUV.x * 0.8);
-                            float gridY = sin(detailUV.y * 0.8);
-                            float farms = step(0.3, gridX * gridY);
-                            col = lerp(col, col * 1.15, farms * biomeZoom * 0.15);
+                            float gridX = sin(detailUV.x * 6.0);
+                            float gridY = sin(detailUV.y * 6.0);
+                            float farms = step(0.4, gridX * gridY);
+                            col = lerp(col, col * 1.35, farms * biomeZoom * 0.20);
                         }
 
                         // Desert: sand ripple lines
@@ -681,6 +688,14 @@ Shader "WarStrategy/MapShader"
                     col *= 0.98 + 0.04 * smoothNoise(uv * 2.0);
                     col = PaletteMap(col);
                     col = lerp(col, col * float3(1.02, 0.99, 0.96), 0.25); // subtle warm, not mud
+
+                    // ── City markers (shader-driven, zoom-gated) ──
+                    if (_HasCityMask > 0.5 && _CityVisibility > 0.01)
+                    {
+                        float cityVal = SAMPLE_TEXTURE2D(_CityMaskTex, sampler_CityMaskTex, uv).r;
+                        float glow = smoothstep(0.3, 1.0, cityVal) * _CityVisibility;
+                        col += float3(0.6, 0.55, 0.4) * glow;
+                    }
 
                     // ── Step 9: GPU Border Detection (integer comparison, 8-neighbor AA) ──
                     // If center pixel itself is an interpolated artifact (owner=0, idx>0),
