@@ -275,9 +275,9 @@ namespace WarStrategy.Map
 
             float[] xOffsets = { -MAP_WIDTH, 0f, MAP_WIDTH };
 
-            // Screen-size clamps: labels stay between 4% and 14% of viewport height
-            float minFontSize = viewportHeight * 0.04f;
-            float maxFontSize = viewportHeight * 0.14f;
+            // Screen-size clamps: labels stay between 6% and 20% of viewport height
+            float minFontSize = viewportHeight * 0.06f;
+            float maxFontSize = viewportHeight * 0.20f;
 
             foreach (var entry in _entries)
             {
