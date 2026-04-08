@@ -20,10 +20,10 @@ namespace WarStrategy.Map
         public const float CITY_ZOOM_THRESHOLD = 3f;
 
         [Header("Colors")]
-        public Color TextColor = new(0.95f, 0.93f, 0.88f, 1f);
-        public Color ShadowColor = new(0.05f, 0.08f, 0.12f, 0.85f);
-        public Color PlayerColor = new(1f, 0.92f, 0.65f, 1f);
-        public Color CityTextColor = new(0.90f, 0.87f, 0.80f, 0.90f);
+        public Color TextColor = new(0.08f, 0.06f, 0.04f, 0.55f);     // dark, semi-transparent — embedded in map
+        public Color ShadowColor = new(1f, 1f, 1f, 0.12f);             // faint white underlay for legibility
+        public Color PlayerColor = new(0.05f, 0.03f, 0.0f, 0.65f);     // slightly darker for player
+        public Color CityTextColor = new(0.12f, 0.10f, 0.08f, 0.70f);  // dark, readable
 
         private MapCamera _mapCamera;
         private TMP_FontAsset _font;
@@ -178,6 +178,61 @@ namespace WarStrategy.Map
             _cityEntries.Clear();
         }
 
+        /// <summary>
+        /// Curve text along a gentle arc by modifying TMP vertex positions.
+        /// curveAmount = max Y displacement at the center of the text.
+        /// Positive = curve upward (smile shape). Call after ForceMeshUpdate().
+        /// </summary>
+        private static void CurveText(TextMeshPro tmp, float curveAmount)
+        {
+            if (curveAmount == 0f) return;
+
+            var textInfo = tmp.textInfo;
+            if (textInfo == null || textInfo.characterCount == 0) return;
+
+            // Find the total width of visible text for normalization
+            int firstVisible = -1, lastVisible = -1;
+            for (int i = 0; i < textInfo.characterCount; i++)
+            {
+                if (!textInfo.characterInfo[i].isVisible) continue;
+                if (firstVisible < 0) firstVisible = i;
+                lastVisible = i;
+            }
+            if (firstVisible < 0) return;
+
+            float leftX = textInfo.characterInfo[firstVisible].bottomLeft.x;
+            float rightX = textInfo.characterInfo[lastVisible].topRight.x;
+            float textWidth = rightX - leftX;
+            if (textWidth < 0.01f) return;
+
+            for (int i = 0; i < textInfo.characterCount; i++)
+            {
+                if (!textInfo.characterInfo[i].isVisible) continue;
+
+                int matIdx = textInfo.characterInfo[i].materialReferenceIndex;
+                int vertIdx = textInfo.characterInfo[i].vertexIndex;
+
+                var verts = textInfo.meshInfo[matIdx].vertices;
+
+                // Character center X, normalized to 0..1 across text width
+                float charCenterX = (verts[vertIdx].x + verts[vertIdx + 2].x) * 0.5f;
+                float t = (charCenterX - leftX) / textWidth; // 0 at left, 1 at right
+
+                // Parabolic arc: max at center (t=0.5), zero at edges
+                float yOffset = curveAmount * (1f - 4f * (t - 0.5f) * (t - 0.5f));
+
+                for (int j = 0; j < 4; j++)
+                    verts[vertIdx + j].y += yOffset;
+            }
+
+            // Push modified vertices back to TMP mesh
+            for (int i = 0; i < textInfo.meshInfo.Length; i++)
+            {
+                textInfo.meshInfo[i].mesh.vertices = textInfo.meshInfo[i].vertices;
+                tmp.UpdateGeometry(textInfo.meshInfo[i].mesh, i);
+            }
+        }
+
         private static string FormatPopulation(long pop)
         {
             if (pop >= 1_000_000)
@@ -289,21 +344,29 @@ namespace WarStrategy.Map
 
                     label.text = text;
                     label.fontSize = fontSize;
-                    label.characterSpacing = 12f;
+                    label.characterSpacing = 18f; // very wide — spans territory
                     label.fontStyle = FontStyles.Bold;
                     label.color = entry.IsPlayer ? PlayerColor : TextColor;
-                    label.outlineWidth = 0.45f;
-                    label.outlineColor = new Color32(8, 12, 20, 230);
+                    label.outlineWidth = 0f; // no outline — text is embedded in map
                     label.transform.position = worldPos;
-                    label.transform.localScale = Vector3.one; // NO 1/zoom scaling
+                    label.transform.localScale = Vector3.one;
 
-                    float shadowOff = Mathf.Max(fontSize * 0.04f, viewportHeight * 0.001f);
+                    // Force mesh update then curve the text
+                    label.ForceMeshUpdate();
+                    CurveText(label, fontSize * 0.15f); // gentle arc
+
+                    // Faint white underlay instead of dark shadow
                     shadow.text = text;
-                    shadow.fontSize = fontSize;
-                    shadow.characterSpacing = 12f;
+                    shadow.fontSize = fontSize * 1.02f; // slightly larger for halo effect
+                    shadow.characterSpacing = 18f;
                     shadow.fontStyle = FontStyles.Bold;
-                    shadow.transform.position = worldPos + new Vector3(shadowOff, -shadowOff, 0.1f);
+                    shadow.outlineWidth = 0.2f;
+                    shadow.outlineColor = new Color32(255, 255, 255, 30);
+                    shadow.transform.position = worldPos + new Vector3(0, 0, 0.1f); // same position, behind
                     shadow.transform.localScale = Vector3.one;
+
+                    shadow.ForceMeshUpdate();
+                    CurveText(shadow, fontSize * 0.15f);
 
                     poolIdx++;
                 }
