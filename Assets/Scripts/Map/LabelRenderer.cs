@@ -18,10 +18,10 @@ namespace WarStrategy.Map
         public const float CITY_ZOOM_THRESHOLD = 3f;
 
         [Header("Colors")]
-        public Color TextColor = new(1f, 1f, 1f, 0.88f);
-        public Color ShadowColor = new(0f, 0f, 0f, 0.6f);
-        public Color PlayerColor = new(0.95f, 0.95f, 0.98f, 1f);
-        public Color CityTextColor = new(0.95f, 0.92f, 0.85f, 0.85f);
+        public Color TextColor = new(0.95f, 0.93f, 0.88f, 1f);    // warm white, full opacity
+        public Color ShadowColor = new(0.05f, 0.08f, 0.12f, 0.85f); // dark navy, strong
+        public Color PlayerColor = new(1f, 0.92f, 0.65f, 1f);       // gold tint for player
+        public Color CityTextColor = new(0.90f, 0.87f, 0.80f, 0.90f);
 
         private MapCamera _mapCamera;
         private TMP_FontAsset _font;
@@ -272,10 +272,10 @@ namespace WarStrategy.Map
                     if (!viewRect.Contains(new Vector2(worldPos.x, worldPos.y)))
                         continue;
 
-                    // Estimate label rect for overlap check (account for 1/zoom scale)
+                    // Estimate label rect for overlap check (account for 1/zoom scale + letter spacing)
                     float labelScale = 1f / zoom;
-                    float estWidth = text.Length * fontSize * 0.5f * labelScale;
-                    float estHeight = fontSize * 1.2f * labelScale;
+                    float estWidth = text.Length * fontSize * 0.65f * labelScale; // wider due to letter spacing
+                    float estHeight = fontSize * 1.4f * labelScale;
                     Rect labelRect = new(worldPos.x - estWidth * 0.5f, worldPos.y - estHeight * 0.5f,
                                         estWidth, estHeight);
 
@@ -303,15 +303,18 @@ namespace WarStrategy.Map
 
                     label.text = text;
                     label.fontSize = fontSize;
-                    label.characterSpacing = 8f; // wide spacing like HOI4/V3 map labels
+                    label.characterSpacing = 12f; // wide spacing like HOI4/V3 map labels
                     label.fontStyle = FontStyles.Bold;
                     label.color = entry.IsPlayer ? PlayerColor : TextColor;
+                    // Enable outline for readability on any terrain
+                    label.outlineWidth = 0.3f;
+                    label.outlineColor = new Color32(10, 15, 25, 200);
                     label.transform.position = worldPos;
 
-                    float shadowOff = Mathf.Max(1f, fontSize * 0.08f);
+                    float shadowOff = Mathf.Max(2f, fontSize * 0.12f);
                     shadow.text = text;
                     shadow.fontSize = fontSize;
-                    shadow.characterSpacing = 8f;
+                    shadow.characterSpacing = 12f;
                     shadow.fontStyle = FontStyles.Bold;
                     shadow.transform.position = worldPos + new Vector3(shadowOff, -shadowOff, 0.1f);
 
