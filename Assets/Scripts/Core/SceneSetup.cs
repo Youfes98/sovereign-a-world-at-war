@@ -101,14 +101,10 @@ namespace WarStrategy.Core
             foreach (var kvp in gameState.Countries)
             {
                 var c = kvp.Value;
-                var (boundsCenter, boundsSize) = provinceDB.GetCountryBounds(c.Iso);
-                Vector2 centroid = boundsCenter;
+                var (_, boundsSize) = provinceDB.GetCountryBounds(c.Iso);
+                Vector2 centroid = c.Centroid;
                 if (centroid == Vector2.zero)
-                {
-                    centroid = c.Centroid;
-                    if (centroid == Vector2.zero)
-                        centroid = provinceDB.GetCentroid(c.Iso);
-                }
+                    centroid = provinceDB.GetCentroid(c.Iso);
 
                 float totalArea = 0f;
                 if (provinceDB.CountryProvinces.TryGetValue(c.Iso, out var provIds))
@@ -273,15 +269,12 @@ namespace WarStrategy.Core
                 {
                     var c = kvp.Value;
 
-                    // Use bounds center as centroid (more accurate for label placement)
-                    var (boundsCenter, boundsSize) = provinceDB.GetCountryBounds(c.Iso);
-                    Vector2 centroid = boundsCenter;
+                    // Use stored centroid for positioning (reliable), bounds width for sizing only
+                    // Bounds center can be wrong for oddly shaped countries (e.g., Morocco → ocean)
+                    var (_, boundsSize) = provinceDB.GetCountryBounds(c.Iso);
+                    Vector2 centroid = c.Centroid;
                     if (centroid == Vector2.zero)
-                    {
-                        centroid = c.Centroid;
-                        if (centroid == Vector2.zero)
-                            centroid = provinceDB.GetCentroid(c.Iso);
-                    }
+                        centroid = provinceDB.GetCentroid(c.Iso);
 
                     float totalArea = 0f;
                     if (provinceDB.CountryProvinces.TryGetValue(c.Iso, out var provIds))
